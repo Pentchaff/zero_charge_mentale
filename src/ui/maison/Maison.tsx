@@ -3,7 +3,7 @@
 // scène de théâtre : deux murs au fond, le sol, des meubles de base, et des
 // emplacements pour les décorations débloquées par la progression (ADR 0020).
 
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { MomentJournee } from '../../compagnon/cycleDeVie';
 import type { Decoration } from '../../domaine/progression';
 import type { PieceId } from '../../domaine/types';
@@ -303,6 +303,66 @@ function SalleDeBain({ deco, moment }: { deco: ReadonlySet<Decoration>; moment: 
       <Plat x={3.6} y={0.4} z={0.96} l={3.5} p={1.5} couleur="#bfe6f2" />
       <Boite x={7} y={0.25} z={1} l={0.15} p={0.15} h={0.5} couleur="#9aa4ac" />
     </g>
+  );
+}
+
+/**
+ * Ce qui passe devant un personnage installé dans un meuble : le bord de la
+ * baignoire, la table de la cuisine, la couverture du lit, le plaid du canapé. Dessiné par-dessus
+ * l'avatar (les personnages sont en HTML au-dessus du décor SVG).
+ */
+export function PremierPlan({ posture, style }: { posture: 'bain' | 'attable' | 'allongeLit' | 'allongeCanape'; style?: CSSProperties }) {
+  return (
+    <svg viewBox={`0 0 ${LARGEUR_VUE} ${HAUTEUR_VUE}`} className="premier-plan" style={style} aria-hidden="true">
+      {posture === 'bain' && (
+        <g>
+          <polygon points={pts([3.6, 1.45, 0.96], [7.1, 1.45, 0.96], [7.1, 1.9, 0.96], [3.6, 1.9, 0.96])} fill="#bfe6f2" opacity={0.9} />
+          <polygon points={pts([7.3, 0.2, 0], [7.3, 2.1, 0], [7.3, 2.1, 1], [7.3, 0.2, 1])} fill={nuance('#ffffff', 0.86)} stroke={nuance('#ffffff', 0.7)} strokeWidth={0.8} />
+          <polygon points={pts([3.4, 2.1, 0], [7.3, 2.1, 0], [7.3, 2.1, 1], [3.4, 2.1, 1])} fill={nuance('#ffffff', 0.74)} stroke={nuance('#ffffff', 0.7)} strokeWidth={0.8} />
+          <polygon points={pts([3.4, 1.9, 1], [7.3, 1.9, 1], [7.3, 2.1, 1], [3.4, 2.1, 1])} fill="#ffffff" />
+          <polygon points={pts([7.1, 0.2, 1], [7.3, 0.2, 1], [7.3, 2.1, 1], [7.1, 2.1, 1])} fill="#ffffff" />
+          <g className="mousse" fill="#ffffff" stroke="#d5ecf3" strokeWidth={1.2}>
+            {[
+              [4.3, 1.3, 13],
+              [4.9, 1.55, 15],
+              [5.6, 1.6, 14],
+              [6.2, 1.4, 12],
+              [4.6, 1.75, 10],
+              [5.9, 1.8, 11],
+              [6.6, 1.65, 9],
+            ].map(([x, y, r], i) => {
+              const [cx, cy] = projeter(x, y, 1.02);
+              return <circle key={i} cx={cx} cy={cy} r={r} style={{ animationDelay: `${i * 0.4}s` }} />;
+            })}
+          </g>
+        </g>
+      )}
+      {posture === 'attable' && (
+        <g>
+          {[
+            [4.3, 5.7],
+            [6.2, 5.7],
+            [6.2, 4.3],
+          ].map(([x, y]) => (
+            <Boite key={`${x}-${y}`} x={x} y={y} l={0.12} p={0.12} h={0.95} couleur={BOIS} />
+          ))}
+          <Boite x={4.2} y={4.2} z={0.95} l={2.2} p={1.6} h={0.14} couleur={BOIS} dessus={BOIS_CLAIR} />
+          <Boite x={5} y={4.7} z={1.09} l={0.5} p={0.5} h={0.12} couleur="#ffffff" />
+        </g>
+      )}
+      {posture === 'allongeLit' && (
+        <g>
+          <Boite x={3.48} y={1.75} z={0.85} l={2.64} p={2.05} h={0.32} couleur="#9cc7a8" />
+          <polyline points={pts([3.5, 2.05, 1.18], [6.12, 2.05, 1.18])} stroke="#fffaf2" strokeWidth={4} fill="none" />
+        </g>
+      )}
+      {posture === 'allongeCanape' && (
+        <g>
+          <Boite x={4.5} y={0.65} z={0.75} l={2.6} p={1.32} h={0.3} couleur="#f6c3a0" />
+          <polyline points={pts([4.75, 1.97, 0.75], [4.75, 1.97, 1.05])} stroke="#fffaf2" strokeWidth={2} fill="none" />
+        </g>
+      )}
+    </svg>
   );
 }
 

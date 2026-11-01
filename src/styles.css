@@ -383,6 +383,8 @@ textarea.saisie {
 
 .maison {
   position: relative;
+  /* Les profondeurs des personnages restent dans la maison. */
+  isolation: isolate;
   border-radius: var(--rayon);
   overflow: hidden;
   aspect-ratio: 360 / 316;
@@ -406,10 +408,43 @@ textarea.saisie {
 .habitant {
   position: absolute;
   transform: translate(-50%, -96%);
-  transition: left 0.6s ease, top 0.6s ease;
   border: none;
   background: none;
   padding: 0;
+}
+
+.habitant-corps {
+  display: block;
+}
+
+/* Allongé sur le lit (tête vers l'oreiller, au fond) ou sur le canapé (tête vers l'accoudoir). */
+.habitant--allongeLit .habitant-corps {
+  transform: translate(8%, 30%) rotate(62deg);
+}
+
+.habitant--allongeCanape .habitant-corps {
+  transform: translate(-6%, 34%) rotate(-62deg);
+}
+
+/* Dans le bain : le bas du corps est sous l'eau. */
+.habitant--bain .habitant-corps {
+  clip-path: inset(0 0 44% 0);
+}
+
+.habitant--marche .habitant-corps {
+  animation: pas-corps 0.42s ease-in-out infinite;
+}
+
+.habitant-corps--saute {
+  animation: saut-rikki 0.34s ease-in-out;
+}
+
+.premier-plan {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .habitant-avatar {
@@ -454,7 +489,7 @@ textarea.saisie {
   position: absolute;
   left: 10px;
   top: 10px;
-  z-index: 50;
+  z-index: 500;
   border: none;
   width: 44px;
   height: 44px;
@@ -464,49 +499,79 @@ textarea.saisie {
   box-shadow: 0 3px 10px rgb(80 60 40 / 0.18);
 }
 
-.envol-emote {
+.effet-scene {
   position: absolute;
-  z-index: 60;
-  font-size: 2.2rem;
-  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
   pointer-events: none;
 }
 
-.envol-emote--recue {
-  animation: emote-recue 3s ease forwards;
+.particule {
+  position: absolute;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  opacity: 0;
+  animation: particule 2.2s ease-out forwards;
 }
 
-.envol-emote--envoyee {
-  animation: emote-envoyee 1.8s ease forwards;
+.particule svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.envol-emote--vers-autre {
-  animation: emote-vers-autre 1.8s ease forwards;
+.effet-scene--boucle .particule {
+  animation-iteration-count: infinite;
+  animation-duration: 2.7s;
 }
 
-@keyframes emote-recue {
-  0% { opacity: 0; transform: translate(-50%, -160%) scale(0.4); }
-  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
-  35%, 45%, 55%, 65% { transform: translate(-50%, -40%) scale(1.1) rotate(-8deg); }
-  40%, 50%, 60% { transform: translate(-50%, -55%) scale(1.15) rotate(8deg); }
-  100% { opacity: 0; transform: translate(-50%, -90%) scale(1); }
+.effet-scene--bisou .particule:first-child {
+  width: 26px;
+  height: 20px;
+  animation-name: bisou-envole;
 }
 
-@keyframes emote-envoyee {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-  25% { opacity: 1; transform: translate(-50%, -70%) scale(1.2); }
-  100% { opacity: 0; transform: translate(-50%, -260%) scale(0.9); }
+.note-musique,
+.zzz {
+  display: block;
+  font-size: 17px;
+  line-height: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: #8a7ab8;
 }
 
-@keyframes emote-vers-autre {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-  20% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
-  100% { opacity: 0; transform: translate(220%, 20%) scale(0.9); }
+.zzz {
+  color: #8a7a9e;
+  font-family: ui-rounded, sans-serif;
+}
+
+@keyframes particule {
+  0% { opacity: 0; transform: translateY(6px) scale(0.4); }
+  20% { opacity: 1; transform: translateY(-4px) scale(1); }
+  100% { opacity: 0; transform: translateY(-38px) scale(0.9) rotate(10deg); }
+}
+
+@keyframes bisou-envole {
+  0% { opacity: 0; transform: scale(0.3); }
+  25% { opacity: 1; transform: scale(1.25); }
+  60% { opacity: 1; transform: translateY(-10px) scale(1); }
+  100% { opacity: 0; transform: translateY(-30px) scale(0.8); }
+}
+
+@keyframes pas-corps {
+  50% { transform: translateY(-3%); }
+}
+
+@keyframes saut-rikki {
+  50% { transform: translateY(-18%); }
 }
 
 .bulle {
   position: absolute;
-  z-index: 55;
+  z-index: 510;
   top: 4%;
   right: 4%;
   max-width: 58%;
@@ -1023,10 +1088,250 @@ textarea.saisie {
   transform-origin: center;
 }
 
+/* Marche : les jambes se lèvent l'une après l'autre, les bras se balancent. */
+.avatar--marche .avatar-jambe--g {
+  animation: jambe 0.42s ease-in-out infinite;
+}
+
+.avatar--marche .avatar-jambe--d {
+  animation: jambe 0.42s ease-in-out -0.21s infinite;
+}
+
+.anim-balance {
+  animation: balance 0.42s ease-in-out infinite alternate;
+}
+
+.anim-balance-inverse {
+  animation: balance 0.42s ease-in-out -0.42s infinite alternate-reverse;
+}
+
+/* Câlin : on se serre et on se berce un peu. */
+.avatar--enlace {
+  animation: serre 1.4s ease-in-out infinite;
+  transform-origin: 50% 95%;
+}
+
+.avatar--bisou {
+  animation: bisou 1.4s ease-in-out infinite;
+  transform-origin: 50% 95%;
+}
+
+.anim-tapote {
+  animation: tapote 0.45s ease-in-out infinite;
+}
+
+.avatar--tapote .avatar-tete {
+  animation: tete-tapotee 0.45s ease-in-out infinite;
+}
+
+.avatar--danse {
+  animation: danse-corps 0.6s ease-in-out infinite;
+  transform-origin: 50% 95%;
+}
+
+.anim-danse {
+  animation: danse-bras 0.6s ease-in-out infinite alternate;
+}
+
+.anim-danse-inverse {
+  animation: danse-bras 0.6s ease-in-out -0.6s infinite alternate-reverse;
+}
+
+.avatar--etire {
+  animation: etire 2.6s ease-in-out infinite;
+  transform-origin: 50% 95%;
+}
+
+.avatar--dort .avatar-tete {
+  animation: avatar-respire 5s ease-in-out infinite;
+}
+
+.anim-secoue {
+  animation: secoue 1.6s ease-in-out infinite;
+}
+
+.objet-crepe {
+  animation: crepe 1.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.objet-vapeur path {
+  animation: vapeur 2.4s ease-out infinite;
+}
+
+.objet-vapeur path:nth-child(2) {
+  animation-delay: 1.2s;
+}
+
+.objet-gouttes ellipse {
+  animation: goutte 0.9s linear infinite;
+}
+
+.objet-gouttes ellipse:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.objet-gouttes ellipse:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+.objet-bulles circle {
+  animation: bulle-savon 1.8s ease-out infinite;
+}
+
+.objet-bulles circle:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.objet-bulles circle:nth-child(3) {
+  animation-delay: 1.2s;
+}
+
+.objet-page {
+  animation: page 4.5s ease-in-out infinite;
+  transform-origin: 100px 220px;
+}
+
+.anim-balaie {
+  animation: balaie 0.8s ease-in-out infinite alternate;
+  transform-origin: 100px 190px;
+}
+
+.anim-frotte {
+  animation: frotte 0.5s ease-in-out infinite alternate;
+}
+
+.anim-plie {
+  animation: plie 1s ease-in-out infinite alternate;
+}
+
+.anim-plie-inverse {
+  animation: plie-d 1s ease-in-out infinite alternate;
+}
+
+.anim-brosse {
+  animation: brosse 0.22s ease-in-out infinite alternate;
+}
+
+.mousse circle {
+  animation: mousse 2.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 @keyframes avatar-respire {
   50% {
     transform: translateY(1.5px);
   }
+}
+
+@keyframes jambe {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-7px); }
+  50% { transform: translateY(0); }
+}
+
+@keyframes balance {
+  from { transform: rotate(-14deg); }
+  to { transform: rotate(14deg); }
+}
+
+@keyframes serre {
+  0%, 100% { transform: rotate(0) scale(1); }
+  50% { transform: rotate(-1.5deg) scale(1.02, 0.98); }
+}
+
+@keyframes bisou {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2%); }
+}
+
+@keyframes tapote {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(14deg); }
+}
+
+@keyframes tete-tapotee {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+@keyframes danse-corps {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-4%) rotate(4deg); }
+}
+
+@keyframes danse-bras {
+  from { transform: rotate(-22deg); }
+  to { transform: rotate(18deg); }
+}
+
+@keyframes etire {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(0.97, 1.04); }
+}
+
+@keyframes secoue {
+  0%, 30%, 100% { transform: rotate(0); }
+  15% { transform: rotate(-7deg); }
+}
+
+@keyframes crepe {
+  0%, 10%, 45%, 100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-30px) rotate(180deg); }
+}
+
+@keyframes vapeur {
+  0% { opacity: 0; transform: translateY(4px); }
+  40% { opacity: 0.85; }
+  100% { opacity: 0; transform: translateY(-12px); }
+}
+
+@keyframes goutte {
+  0% { opacity: 0; transform: translate(0, -6px); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translate(3px, 18px); }
+}
+
+@keyframes bulle-savon {
+  0% { opacity: 0; transform: translateY(4px); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-14px); }
+}
+
+@keyframes page {
+  0%, 70%, 100% { transform: scaleX(1); }
+  85% { transform: scaleX(-1); }
+}
+
+@keyframes balaie {
+  from { transform: rotate(-9deg); }
+  to { transform: rotate(9deg); }
+}
+
+@keyframes frotte {
+  from { transform: rotate(-8deg); }
+  to { transform: rotate(8deg); }
+}
+
+@keyframes plie {
+  from { transform: rotate(0); }
+  to { transform: rotate(-12deg); }
+}
+
+@keyframes plie-d {
+  from { transform: rotate(0); }
+  to { transform: rotate(12deg); }
+}
+
+@keyframes brosse {
+  from { transform: rotate(-4deg); }
+  to { transform: rotate(4deg); }
+}
+
+@keyframes mousse {
+  50% { transform: scale(1.12); }
 }
 
 /* ---------- Animations de Rikki (ADR 0010) ---------- */

@@ -112,6 +112,10 @@ _Avoid_ : Zéro Charge Mentale, ZCM, l'app
 Un personnage humain mignon en SVG qui représente le membre dans l'app, style Mii. Créé à l'onboarding avec un éditeur simple (visage, cheveux, couleur). C'est l'avatar qui accomplit les micro-étapes et qui interagit avec l'avatar de l'autre membre (émotes). Le compagnon (Rikki) est le pet de l'avatar.
 _Avoid_ : profil, personnage, Mii, icône
 
+**Activité** :
+Ce que fait un avatar dans la maison quand il n'accomplit pas de micro-étape : lire sur le canapé, boire un thé, cuisiner, prendre un bain, dormir, faire un câlin à Rikki. Elle dépend de la pièce, de l'heure et des décorations débloquées ; en mode 🪫, seulement des activités calmes. Ce n'est jamais une tâche déguisée : l'avatar ne fait pas le ménage tout seul.
+_Avoid_ : animation, occupation, cycle de vie (réservé à Rikki), tâche
+
 **Éditeur d'avatar** :
 L'écran de création de l'avatar : quelques curseurs et choix visuels (forme du visage, coiffure, couleur de peau, yeux, accessoires). Aussi simple que l'éditeur Mii. Accessible à l'onboarding et modifiable plus tard.
 _Avoid_ : character creator, personnalisation

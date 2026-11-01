@@ -6,13 +6,18 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 import type { AvatarConfig, Coiffure, FormeVisage } from '../../domaine/types';
+import { EPAULE_D, EPAULE_G, ObjetDevant, ObjetTenu, POSES, positionMain, type Cote, type DefPose, type PoseAvatar } from './poses';
 
-export type PoseAvatar = 'repos' | 'fait' | 'calin' | 'content';
+export type { Cote, PoseAvatar } from './poses';
 export type Cadrage = 'complet' | 'tete' | 'yeux' | 'sourcils' | 'nez' | 'bouche' | 'menton';
 
 interface Props {
   config: AvatarConfig;
   pose?: PoseAvatar;
+  /** Vers où se tourne une pose dirigée (câlin, bisou, pat pat, poêle…). */
+  cote?: Cote;
+  /** Assis : les jambes sont pliées vers l'avant. */
+  assis?: boolean;
   cadrage?: Cadrage;
   className?: string;
   style?: CSSProperties;
@@ -711,31 +716,60 @@ function CoiffeSvg({ forme, couleurTenue }: { forme: AvatarConfig['coiffe']; cou
 
 // ---------------------------------------------------------------- Corps
 
-function Corps({ config, pose }: { config: AvatarConfig; pose: PoseAvatar }) {
+function BrasSvg({ epaule, cote, bras, couleur, ombre, peau }: { epaule: [number, number]; cote: 'g' | 'd'; bras: DefPose['g']; couleur: string; ombre: string; peau: string }) {
+  const longueur = bras.longueur ?? 46;
+  const x = cote === 'g' ? 48 : 132;
+  const origine = `${epaule[0]}px ${epaule[1]}px`;
+  const [mx, my] = positionMain(epaule, cote, bras.angle, longueur);
+  return (
+    <g className={bras.anim ? `avatar-bras-anim anim-${bras.anim}` : undefined} style={{ transformOrigin: origine }}>
+      <g className="avatar-bras" style={{ transform: `rotate(${bras.angle}deg)`, transformOrigin: origine }}>
+        <rect x={x} y={180} width={20} height={longueur} rx={10} fill={couleur} stroke={ombre} strokeWidth={2} />
+        <circle cx={x + 10} cy={182 + longueur} r={9} fill={peau} />
+      </g>
+      {bras.objet && <ObjetTenu objet={bras.objet} x={mx} y={my} />}
+    </g>
+  );
+}
+
+/** Les deux bras, en miroir quand la pose se tourne vers la gauche. */
+function DeuxBras({ def, cote, couleur, ombre, peau }: { def: DefPose; cote: Cote; couleur: string; ombre: string; peau: string }) {
+  const contenu = (
+    <>
+      <BrasSvg epaule={EPAULE_G} cote="g" bras={def.g} couleur={couleur} ombre={ombre} peau={peau} />
+      <BrasSvg epaule={EPAULE_D} cote="d" bras={def.d} couleur={couleur} ombre={ombre} peau={peau} />
+    </>
+  );
+  return cote === 'gauche' ? <g transform="translate(200 0) scale(-1 1)">{contenu}</g> : contenu;
+}
+
+function Corps({ config, pose, cote, assis }: { config: AvatarConfig; pose: PoseAvatar; cote: Cote; assis: boolean }) {
   const c = config.couleurTenue;
   const ombre = assombrir(c);
   const peau = config.peau;
-  // Rotation horaire à l'écran : le bras gauche monte avec un angle positif.
-  const brasG = pose === 'fait' ? 140 : pose === 'calin' ? -35 : 0;
-  const brasD = pose === 'fait' ? -140 : pose === 'calin' ? 35 : 0;
+  const def = POSES[pose];
   const bas = config.tenue === 'kimono' ? 262 : 236;
   const pantalon = config.tenue === 'salopette' ? '#5b7fb8' : config.tenue === 'kimono' ? assombrir(c, 0.8) : '#6b7a99';
+  const hautJambe = assis ? 24 : 46;
+  const yPied = assis ? 248 : 270;
   return (
     <g transform={`translate(100 166) scale(${config.corpulence} ${config.stature}) translate(-100 -166)`}>
-      <g className="avatar-bras" style={{ transform: `rotate(${brasG}deg)`, transformOrigin: '62px 184px' }}>
-        <rect x={48} y={180} width={20} height={46} rx={10} fill={c} stroke={ombre} strokeWidth={2} />
-        <circle cx={58} cy={228} r={9} fill={peau} />
-      </g>
-      <g className="avatar-bras" style={{ transform: `rotate(${brasD}deg)`, transformOrigin: '138px 184px' }}>
-        <rect x={132} y={180} width={20} height={46} rx={10} fill={c} stroke={ombre} strokeWidth={2} />
-        <circle cx={142} cy={228} r={9} fill={peau} />
-      </g>
-      {/* Jambes et chaussures : l'avatar tient debout dans la maison. */}
+      {/* Les bras sont derrière le corps ; l'objet tenu devant est dessiné après le corps. */}
+      {!def.brasDevant && (
+        <g className={def.g.anim === 'balaie' ? 'anim-balaie' : undefined}>
+          <DeuxBras def={def} cote={cote} couleur={c} ombre={ombre} peau={peau} />
+        </g>
+      )}
+      {/* Jambes et chaussures : l'avatar tient debout (ou assis) dans la maison. */}
       <g>
-        <rect x={78} y={222} width={19} height={46} rx={8} fill={pantalon} stroke={assombrir(pantalon, 0.8)} strokeWidth={2} />
-        <rect x={103} y={222} width={19} height={46} rx={8} fill={pantalon} stroke={assombrir(pantalon, 0.8)} strokeWidth={2} />
-        <ellipse cx={86} cy={270} rx={14} ry={8} fill="#5a4a42" />
-        <ellipse cx={114} cy={270} rx={14} ry={8} fill="#5a4a42" />
+        <g className="avatar-jambe avatar-jambe--g">
+          <rect x={78} y={222} width={19} height={hautJambe} rx={8} fill={pantalon} stroke={assombrir(pantalon, 0.8)} strokeWidth={2} />
+          <ellipse cx={86} cy={yPied} rx={14} ry={8} fill="#5a4a42" />
+        </g>
+        <g className="avatar-jambe avatar-jambe--d">
+          <rect x={103} y={222} width={19} height={hautJambe} rx={8} fill={pantalon} stroke={assombrir(pantalon, 0.8)} strokeWidth={2} />
+          <ellipse cx={114} cy={yPied} rx={14} ry={8} fill="#5a4a42" />
+        </g>
       </g>
       <rect x={90} y={148} width={20} height={22} fill={assombrir(peau, 0.92)} />
       {config.tenue === 'sweat' && <path d="M70,176 Q100,150 130,176 L124,186 Q100,166 76,186 Z" fill={ombre} />}
@@ -777,8 +811,40 @@ function Corps({ config, pose }: { config: AvatarConfig; pose: PoseAvatar }) {
           <rect x={58} y={206} width={84} height={12} fill={assombrir(c, 0.7)} />
         </g>
       )}
+      {def.brasDevant && <DeuxBras def={def} cote={cote} couleur={c} ombre={ombre} peau={peau} />}
+      {def.devant && <MainsDevant def={def} cote={cote} peau={peau} />}
     </g>
   );
+}
+
+/** La main droite et son objet, redessinés devant le visage (brosse à dents). */
+function MainDevantTete({ config, def, cote }: { config: AvatarConfig; def: DefPose; cote: Cote }) {
+  const [mx, my] = positionMain(EPAULE_D, 'd', def.d.angle, def.d.longueur);
+  const contenu = (
+    <g className={def.d.anim ? `avatar-bras-anim anim-${def.d.anim}` : undefined} style={{ transformOrigin: `${EPAULE_D[0]}px ${EPAULE_D[1]}px` }}>
+      {def.d.objet && <ObjetTenu objet={def.d.objet} x={mx} y={my} />}
+      <circle cx={mx} cy={my} r={9} fill={config.peau} stroke={assombrir(config.peau, 0.88)} strokeWidth={1.5} />
+    </g>
+  );
+  return (
+    <g transform={`translate(100 166) scale(${config.corpulence} ${config.stature}) translate(-100 -166)`}>
+      {cote === 'gauche' ? <g transform="translate(200 0) scale(-1 1)">{contenu}</g> : contenu}
+    </g>
+  );
+}
+
+/** L'objet tenu devant la poitrine, et les mains par-dessus. */
+function MainsDevant({ def, cote, peau }: { def: DefPose; cote: Cote; peau: string }) {
+  const [gx, gy] = positionMain(EPAULE_G, 'g', def.g.angle);
+  const [dx, dy] = positionMain(EPAULE_D, 'd', def.d.angle);
+  const contenu = (
+    <g className={def.g.anim === 'balaie' ? 'anim-balaie' : undefined}>
+      {def.devant && <ObjetDevant objet={def.devant} />}
+      <circle cx={gx} cy={gy} r={9} fill={peau} stroke={assombrir(peau, 0.88)} strokeWidth={1.5} />
+      <circle cx={dx} cy={dy} r={9} fill={peau} stroke={assombrir(peau, 0.88)} strokeWidth={1.5} />
+    </g>
+  );
+  return cote === 'gauche' ? <g transform="translate(200 0) scale(-1 1)">{contenu}</g> : contenu;
 }
 
 function Miroir({ actif, children }: { actif: boolean; children: ReactNode }) {
@@ -791,47 +857,55 @@ function Ajuste({ largeur, children }: { largeur: number; children: ReactNode })
   return k === 1 ? <>{children}</> : <g transform={`translate(${CX} 0) scale(${k} 1) translate(${-CX} 0)`}>{children}</g>;
 }
 
-export function Avatar({ config, pose = 'repos', cadrage = 'complet', className, style, titre }: Props) {
+export function Avatar({ config, pose = 'repos', cote = 'droite', assis = false, cadrage = 'complet', className, style, titre }: Props) {
   const a = config;
+  const def = POSES[pose];
   const largeur = LARGEUR[a.visage];
-  const joyeux = pose === 'fait' || pose === 'content';
-  const yeux = joyeux ? 'joyeux' : a.yeux;
-  const bouche = pose === 'fait' ? 'grand' : pose === 'content' ? 'large' : a.bouche;
+  const joyeux = def.yeux === 'joyeux';
+  const yeux = def.yeux === 'joyeux' || def.yeux === 'endormis' ? def.yeux : a.yeux;
+  const bouche = def.bouche ?? a.bouche;
+  const sens = cote === 'gauche' ? -1 : 1;
 
-  const yYeux = CY + 8 - a.yeuxHauteur;
+  const yYeux = CY + 8 - a.yeuxHauteur + (def.yeux === 'bas' ? 4 : 0);
   const dxYeux = 23 + a.yeuxEcart;
   const ySourcils = CY - 10 - a.sourcilsHauteur;
   const dxSourcils = 23 + a.sourcilsEcart;
   const yNez = CY + 22 - a.nezHauteur;
   const yBouche = CY + 34 - a.boucheHauteur;
   const avecCorps = cadrage === 'complet';
+  const inclinaisonTete = def.tete ? `rotate(${sens * def.tete} ${CX} 150)` : undefined;
+  const inclinaisonCorps = def.corps ? `rotate(${sens * def.corps} ${CX} 270)` : undefined;
 
   return (
     <svg
       viewBox={CADRAGES[cadrage]}
-      className={['avatar', `avatar--${pose}`, className].filter(Boolean).join(' ')}
+      className={['avatar', `avatar--${pose}`, assis && 'avatar--assis', className].filter(Boolean).join(' ')}
       style={style}
       role="img"
       aria-label={titre}
     >
       {titre && <title>{titre}</title>}
-      <Ajuste largeur={largeur}>
-        <Miroir actif={a.coiffureMiroir}>
-          <CheveuxArriere coiffure={a.coiffure} couleur={a.couleurCheveux} />
-        </Miroir>
-      </Ajuste>
-      {avecCorps && <Corps config={a} pose={pose} />}
+      <g transform={inclinaisonCorps}>
+      <g transform={inclinaisonTete}>
+        <Ajuste largeur={largeur}>
+          <Miroir actif={a.coiffureMiroir}>
+            <CheveuxArriere coiffure={a.coiffure} couleur={a.couleurCheveux} />
+          </Miroir>
+        </Ajuste>
+      </g>
+      {avecCorps && <Corps config={a} pose={pose} cote={cote} assis={assis} />}
       {avecCorps && (
         <Miroir actif={a.coiffureMiroir}>
           <CheveuxEpaule coiffure={a.coiffure} couleur={a.couleurCheveux} />
         </Miroir>
       )}
+      <g transform={inclinaisonTete}>
       <g className="avatar-tete">
         <circle cx={CX - largeur + 1} cy={CY + 12} r={10} fill={a.peau} stroke={assombrir(a.peau, 0.88)} strokeWidth={2} />
         <circle cx={CX + largeur - 1} cy={CY + 12} r={10} fill={a.peau} stroke={assombrir(a.peau, 0.88)} strokeWidth={2} />
         <Visage forme={a.visage} peau={a.peau} />
-        {(a.joues || joyeux) && (
-          <g fill="#f4978e" opacity={joyeux ? 0.6 : 0.45}>
+        {(a.joues || joyeux || def.joues) && (
+          <g fill="#f4978e" opacity={joyeux || def.joues ? 0.6 : 0.45}>
             <ellipse cx={CX - 34} cy={CY + 28} rx={9} ry={6} />
             <ellipse cx={CX + 34} cy={CY + 28} rx={9} ry={6} />
           </g>
@@ -879,7 +953,11 @@ export function Avatar({ config, pose = 'repos', cadrage = 'complet', className,
         <LunettesSvg forme={a.lunettes} couleur={a.couleurLunettes} dx={dxYeux} y={yYeux} taille={a.yeuxTaille} />
         <Ajuste largeur={largeur}>
           <CoiffeSvg forme={a.coiffe} couleurTenue={a.couleurTenue} />
+          {def.casque && a.coiffe !== 'casque' && <CoiffeSvg forme="casque" couleurTenue={a.couleurTenue} />}
         </Ajuste>
+      </g>
+      </g>
+      {avecCorps && def.mainDevantTete && <MainDevantTete config={a} def={def} cote={cote} />}
       </g>
     </svg>
   );

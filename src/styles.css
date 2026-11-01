@@ -188,6 +188,11 @@ button:disabled {
   height: 34px;
 }
 
+.entete-membre--present {
+  border-color: var(--accent) !important;
+  opacity: 1 !important;
+}
+
 .entete-membre {
   border: 2px solid var(--bord);
   background: var(--surface);
@@ -380,9 +385,10 @@ textarea.saisie {
   position: relative;
   border-radius: var(--rayon);
   overflow: hidden;
-  aspect-ratio: 400 / 260;
-  box-shadow: var(--ombre);
+  aspect-ratio: 360 / 316;
   margin-top: 4px;
+  background: radial-gradient(circle at 50% 30%, var(--surface) 0, var(--surface-2) 80%);
+  box-shadow: var(--ombre);
 }
 
 .maison-svg {
@@ -399,26 +405,24 @@ textarea.saisie {
 
 .habitant {
   position: absolute;
-  bottom: 6%;
-  transition: left 0.6s ease;
+  transform: translate(-50%, -96%);
+  transition: left 0.6s ease, top 0.6s ease;
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .habitant-avatar {
-  left: 22%;
-  width: 26%;
+  width: 21%;
 }
 
 .habitant-rikki {
-  left: 47%;
-  width: 30%;
+  width: 19%;
 }
 
-.habitant-avatar--calin {
-  left: 28%;
-}
-
-.habitant-rikki--calin {
-  left: 43%;
+.habitant-rikki--autre {
+  width: 15%;
+  opacity: 0.95;
 }
 
 .habitant svg {
@@ -428,11 +432,84 @@ textarea.saisie {
   overflow: visible;
 }
 
+.habitant-autre {
+  cursor: pointer;
+}
+
+.etiquette-prenom {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  transform: translateX(-50%);
+  background: rgb(255 253 248 / 0.92);
+  color: #3d3027;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+
+.bouton-emote {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 50;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  background: rgb(255 253 248 / 0.9);
+  box-shadow: 0 3px 10px rgb(80 60 40 / 0.18);
+}
+
+.envol-emote {
+  position: absolute;
+  z-index: 60;
+  font-size: 2.2rem;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.envol-emote--recue {
+  animation: emote-recue 3s ease forwards;
+}
+
+.envol-emote--envoyee {
+  animation: emote-envoyee 1.8s ease forwards;
+}
+
+.envol-emote--vers-autre {
+  animation: emote-vers-autre 1.8s ease forwards;
+}
+
+@keyframes emote-recue {
+  0% { opacity: 0; transform: translate(-50%, -160%) scale(0.4); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+  35%, 45%, 55%, 65% { transform: translate(-50%, -40%) scale(1.1) rotate(-8deg); }
+  40%, 50%, 60% { transform: translate(-50%, -55%) scale(1.15) rotate(8deg); }
+  100% { opacity: 0; transform: translate(-50%, -90%) scale(1); }
+}
+
+@keyframes emote-envoyee {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  25% { opacity: 1; transform: translate(-50%, -70%) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -260%) scale(0.9); }
+}
+
+@keyframes emote-vers-autre {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  20% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
+  100% { opacity: 0; transform: translate(220%, 20%) scale(0.9); }
+}
+
 .bulle {
   position: absolute;
-  top: 6%;
-  left: 50%;
-  max-width: 56%;
+  z-index: 55;
+  top: 4%;
+  right: 4%;
+  max-width: 58%;
   background: #fffdf8;
   color: #3d3027;
   border-radius: 18px;
@@ -1108,5 +1185,178 @@ textarea.saisie {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- v0 complète : émotes, rappels, invitation, curseurs ---------- */
+
+.carte-emotes {
+  text-align: center;
+  animation: carte-arrive 0.3s ease;
+}
+
+.carte-emotes-titre {
+  font-weight: 800;
+  margin: 6px 0 12px;
+}
+
+.choix-emotes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.carte-rappel {
+  text-align: center;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.carte-rappel-titre {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.barre-actions--centre {
+  justify-content: center;
+  margin: 8px 0 0;
+}
+
+.liste-rappels {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ligne-rappel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ligne-rappel-texte {
+  flex: 1;
+  text-align: left;
+  border: none;
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 8px 12px;
+}
+
+.ligne-rappel-texte .champ-aide {
+  margin: 0;
+}
+
+.saisie--heure {
+  max-width: 9em;
+  font-size: 1.2rem;
+}
+
+.bloc-invitation {
+  text-align: center;
+}
+
+.code-invitation {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  background: var(--surface-2);
+  border-radius: 18px;
+  padding: 10px;
+  margin: 8px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.saisie--code {
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.aide-installation {
+  text-align: left;
+}
+
+.aide-installation ol {
+  margin: 6px 0 0;
+  padding-left: 1.3em;
+}
+
+.pastille-en-ligne {
+  color: var(--accent-fonce);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+.ecran-attente {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.ea-vignettes--yeux,
+.ea-vignettes--sourcils,
+.ea-vignettes--bouche,
+.ea-vignettes--nez {
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+}
+
+.ea-vignettes--yeux .ea-vignette,
+.ea-vignettes--sourcils .ea-vignette,
+.ea-vignettes--bouche .ea-vignette,
+.ea-vignettes--nez .ea-vignette {
+  aspect-ratio: 5 / 3;
+}
+
+.ea-curseurs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ea-curseur {
+  display: grid;
+  grid-template-columns: 7.5em 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.ea-curseur input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+  height: 28px;
+}
+
+.ea-reinitialiser {
+  align-self: flex-start;
+  font-size: 0.85rem;
+}
+
+/* Le choix d'émote s'ouvre comme une feuille au-dessus de la navigation. */
+.carte-emotes {
+  position: fixed;
+  left: 50%;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  width: min(528px, calc(100% - 32px));
+  z-index: 30;
+  margin: 0;
+  transform: translateX(-50%);
+  animation: feuille-monte 0.3s ease;
+  box-shadow: 0 -6px 30px rgb(80 60 40 / 0.25);
+}
+
+@keyframes feuille-monte {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
   }
 }

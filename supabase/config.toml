@@ -1,0 +1,3 @@
+# Utilisé seulement si l'on déploie avec la CLI Supabase (`supabase functions deploy rikki-push`).
+[functions.rikki-push]
+verify_jwt = false

@@ -68,39 +68,136 @@ export interface Tache {
   origine: 'foyerType' | 'foyer';
 }
 
-export type FormeVisage = 'rond' | 'ovale' | 'carre' | 'pointu';
+export type FormeVisage = 'rond' | 'ovale' | 'carre' | 'pointu' | 'large' | 'long' | 'coeur' | 'poire';
 export type Coiffure =
   | 'courte'
   | 'frange'
   | 'carre'
   | 'longue'
   | 'queue'
+  | 'couettes'
   | 'chignon'
   | 'boucles'
   | 'herisse'
+  | 'rase'
+  | 'miLongue'
+  | 'afro'
+  | 'tresse'
+  | 'meche'
+  | 'iroquoise'
+  | 'banane'
+  | 'ondulee'
+  | 'odango'
+  | 'calvitie'
   | 'chauve';
-export type FormeYeux = 'ronds' | 'grands' | 'amande' | 'joyeux' | 'endormis';
-export type Sourcils = 'fins' | 'epais' | 'arrondis' | 'aucun';
-export type Bouche = 'sourire' | 'grand' | 'petit' | 'chat' | 'neutre';
-export type Lunettes = 'aucune' | 'rondes' | 'carrees' | 'soleil';
-export type Coiffe = 'aucune' | 'bonnet' | 'noeud' | 'fleur' | 'casque' | 'couronne';
-export type Tenue = 'tshirt' | 'pull' | 'rayures' | 'salopette' | 'kimono';
+export type FormeYeux =
+  | 'ronds'
+  | 'grands'
+  | 'amande'
+  | 'joyeux'
+  | 'endormis'
+  | 'points'
+  | 'brillants'
+  | 'cils'
+  | 'fins'
+  | 'etoiles'
+  | 'tombants'
+  | 'chat'
+  | 'demiLune';
+export type Sourcils =
+  | 'fins'
+  | 'epais'
+  | 'arrondis'
+  | 'courts'
+  | 'accent'
+  | 'touffus'
+  | 'points'
+  | 'arques'
+  | 'droits'
+  | 'aucun';
+export type Nez = 'arc' | 'point' | 'rond' | 'triangle' | 'bouton' | 'long' | 'pointu' | 'aucun';
+export type Bouche =
+  | 'sourire'
+  | 'grand'
+  | 'petit'
+  | 'chat'
+  | 'neutre'
+  | 'dents'
+  | 'langue'
+  | 'moue'
+  | 'surpris'
+  | 'coin'
+  | 'anime'
+  | 'bisou'
+  | 'large';
+export type Moustache = 'aucune' | 'fine' | 'epaisse' | 'guidon' | 'pointes';
+export type Barbe = 'aucune' | 'courte' | 'pleine' | 'bouc' | 'collier' | 'longue';
+export type Lunettes = 'aucune' | 'rondes' | 'carrees' | 'ovales' | 'papillon' | 'demiLune' | 'soleil';
+export type Coiffe =
+  | 'aucune'
+  | 'bonnet'
+  | 'noeud'
+  | 'casquette'
+  | 'serreTete'
+  | 'barrette'
+  | 'fleur'
+  | 'casque'
+  | 'couronne';
+export type Tenue = 'tshirt' | 'pull' | 'chemise' | 'sweat' | 'rayures' | 'salopette' | 'kimono';
 
-/** L'avatar : un assemblage de pièces interchangeables, style Mii (ADR 0017). */
+/**
+ * L'avatar : un assemblage de pièces interchangeables, style Mii (ADR 0017).
+ * Les réglages numériques déplacent ou redimensionnent une pièce ; 0 (ou 1
+ * pour une taille) est la position par défaut.
+ */
 export interface AvatarConfig {
+  version: 2;
   visage: FormeVisage;
   peau: string;
+  joues: boolean;
+  rousseur: boolean;
+  grainDeBeaute: boolean;
+
   coiffure: Coiffure;
   couleurCheveux: string;
+  coiffureMiroir: boolean;
+
+  sourcils: Sourcils;
+  couleurSourcils: string;
+  sourcilsTaille: number;
+  sourcilsRotation: number;
+  sourcilsEcart: number;
+  sourcilsHauteur: number;
+
   yeux: FormeYeux;
   couleurYeux: string;
-  sourcils: Sourcils;
+  yeuxTaille: number;
+  yeuxRotation: number;
+  yeuxEcart: number;
+  yeuxHauteur: number;
+
+  nez: Nez;
+  nezTaille: number;
+  nezHauteur: number;
+
   bouche: Bouche;
-  joues: boolean;
+  couleurLevres: string;
+  boucheTaille: number;
+  boucheHauteur: number;
+
+  moustache: Moustache;
+  barbe: Barbe;
+
   lunettes: Lunettes;
+  couleurLunettes: string;
   coiffe: Coiffe;
+
   tenue: Tenue;
   couleurTenue: string;
+  /** Hauteur du corps (0,85 à 1,15). */
+  stature: number;
+  /** Largeur du corps (0,8 à 1,25). */
+  corpulence: number;
 }
 
 export interface Membre {
@@ -111,6 +208,8 @@ export interface Membre {
   avatar: AvatarConfig;
   /** Le nom que le membre donne à son Rikki. */
   nomRikki: string;
+  /** Recevoir les émotes en notification (opt-in, ADR 0006, ADR 0025). */
+  notifEmotes?: boolean;
 }
 
 export interface MaisonConfig {
@@ -118,10 +217,38 @@ export interface MaisonConfig {
   couleurMurs: string;
 }
 
+/**
+ * Un rappel personnel (ADR 0006) : activé par le membre lui-même, jamais
+ * visible par l'autre (ADR 0005). Le libellé reste vague, sans nom de
+ * médicament (ADR 0007).
+ */
+export interface Rappel {
+  id: string;
+  libelle: string;
+  /** Heure locale « HH:MM ». */
+  heure: string;
+  /** Jours ISO : 1 (lundi) à 7 (dimanche). */
+  jours: number[];
+  /** Fuseau IANA du téléphone au moment de l'enregistrement. */
+  fuseau: string;
+  actif: boolean;
+}
+
+export type TypeEmote = 'calin' | 'bisou' | 'patpat';
+
+/** Une émote reçue (ADR 0011) : éphémère, effacée dès qu'elle a été vue. */
+export interface Emote {
+  de: MembreId;
+  type: TypeEmote;
+  envoyeLe: number;
+}
+
 export interface Foyer {
   version: 1;
   id: string;
   creeLe: number;
+  /** Code à partager pour rejoindre le foyer (synchronisation uniquement). */
+  codeInvitation?: string;
   membres: Membre[];
   taches: Tache[];
   /**

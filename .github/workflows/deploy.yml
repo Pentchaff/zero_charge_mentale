@@ -1,11 +1,12 @@
 # Tests, build et déploiement sur GitHub Pages (ADR 0004).
-# À activer une fois : Settings → Pages → Source : « GitHub Actions ».
+# Une fois : Settings → Pages → Source : « GitHub Actions », et les variables
+# SUPABASE_URL, SUPABASE_ANON_KEY (et VAPID_PUBLIC_KEY) dans
+# Settings → Secrets and variables → Actions → Variables. Voir docs/INSTALLATION.md.
 name: Déployer sur GitHub Pages
 
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
@@ -29,13 +30,17 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          VITE_VAPID_PUBLIC_KEY: ${{ vars.VAPID_PUBLIC_KEY }}
       - uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main'
         with:
           path: dist
 
+  # Seule la branche par défaut du dépôt est publiée.
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref_name == github.event.repository.default_branch
     needs: build
     runs-on: ubuntu-latest
     environment:

@@ -13,7 +13,7 @@ const DOMAINES: DomaineId[] = ['logement', 'linge', 'repas', 'soins'];
 const ICONES: Record<DomaineId, string> = { logement: '🏠', linge: '🧺', repas: '🍙', soins: '🫧' };
 
 export function EditeurTaches() {
-  const { foyer, t, langue, modifierFoyer } = useFoyer();
+  const { foyer, membre, t, langue, modifierFoyer } = useFoyer();
   const [enCours, setEnCours] = useState<Tache | null>(null);
   const [voirEcartees, setVoirEcartees] = useState(false);
 
@@ -53,7 +53,7 @@ export function EditeurTaches() {
       <h1>{t('taches.titre')}</h1>
       <p className="intro">{t('taches.intro')}</p>
 
-      <button type="button" className="bouton bouton--principal bouton--large" onClick={() => setEnCours(tacheVierge())}>
+      <button type="button" className="bouton bouton--principal bouton--large" onClick={() => setEnCours(membre.estAidant ? tacheVierge() : { ...tacheVierge(), portee: { type: 'membre', membreId: membre.id } })}>
         ＋ {t('taches.nouvelle')}
       </button>
 

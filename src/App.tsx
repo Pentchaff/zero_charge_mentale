@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Accueil } from './ecrans/Accueil';
 import { EcranAvatar } from './ecrans/EcranAvatar';
 import { EditeurTaches } from './ecrans/EditeurTaches';
@@ -7,21 +7,17 @@ import { Reglages } from './ecrans/Reglages';
 import { useApp, useFoyer } from './etat/contexte';
 import type { Cle } from './i18n';
 import { Avatar } from './ui/avatar/Avatar';
+import { Rikki } from './ui/rikki/Rikki';
 
 type Onglet = 'accueil' | 'avatar' | 'taches' | 'reglages';
 
+const ONGLETS: Onglet[] = ['accueil', 'avatar', 'taches', 'reglages'];
 const ICONES: Record<Onglet, string> = { accueil: '🏡', avatar: '🧑', taches: '📝', reglages: '⚙️' };
 
 function Coquille() {
-  const { foyer, membre, t, choisirMembre } = useFoyer();
+  const { foyer, membre, t, choisirMembre, backend, enLigne } = useFoyer();
   const [onglet, setOnglet] = useState<Onglet>('accueil');
-  // L'éditeur de tâches est l'outil de l'aidant (ADR 0014).
-  const onglets: Onglet[] = membre.estAidant ? ['accueil', 'avatar', 'taches', 'reglages'] : ['accueil', 'avatar', 'reglages'];
-
-  useEffect(() => {
-    if (!onglets.includes(onglet)) setOnglet('accueil');
-  }, [membre.id, membre.estAidant]);
-
+  const local = backend.mode === 'local';
   const autres = foyer.membres.filter((m) => m.id !== membre.id);
 
   return (
@@ -29,13 +25,23 @@ function Coquille() {
       <header className="entete">
         <span className="entete-nom">{t('app.nom')}</span>
         <div className="entete-membres">
-          {autres.map((m) => (
-            <button key={m.id} type="button" className="entete-membre" onClick={() => choisirMembre(m.id)} title={m.prenom}>
-              <Avatar config={m.avatar} teteSeule />
-            </button>
-          ))}
+          {autres.map((m) => {
+            const present = !local && enLigne.has(m.id);
+            return (
+              <button
+                key={m.id}
+                type="button"
+                className={present ? 'entete-membre entete-membre--present' : 'entete-membre'}
+                onClick={() => (local ? choisirMembre(m.id) : setOnglet('accueil'))}
+                title={m.prenom}
+                aria-label={local ? t('reglages.utiliserEnTantQue', { prenom: m.prenom }) : m.prenom}
+              >
+                <Avatar config={m.avatar} cadrage="tete" />
+              </button>
+            );
+          })}
           <span className="entete-moi">
-            <Avatar config={membre.avatar} teteSeule />
+            <Avatar config={membre.avatar} cadrage="tete" />
             <span>{membre.prenom}</span>
           </span>
         </div>
@@ -49,7 +55,7 @@ function Coquille() {
       </main>
 
       <nav className="navigation">
-        {onglets.map((o) => (
+        {ONGLETS.map((o) => (
           <button
             key={o}
             type="button"
@@ -67,6 +73,25 @@ function Coquille() {
 }
 
 export function App() {
-  const { foyer, membre } = useApp();
+  const { etat, erreur, foyer, membre, t } = useApp();
+  if (etat === 'chargement') {
+    return (
+      <div className="ecran-attente">
+        <Rikki etat="eveille" className="onboarding-rikki" />
+      </div>
+    );
+  }
+  if (etat === 'erreur') {
+    return (
+      <div className="ecran-attente">
+        <Rikki etat="dort" className="onboarding-rikki" />
+        <p className="carte-repos-titre">{t('erreur.demarrage')}</p>
+        <p className="champ-aide">{erreur}</p>
+        <button type="button" className="bouton bouton--principal" onClick={() => window.location.reload()}>
+          {t('erreur.reessayer')}
+        </button>
+      </div>
+    );
+  }
   return foyer && membre ? <Coquille /> : <Onboarding />;
 }

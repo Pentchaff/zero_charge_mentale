@@ -1,3 +1,4 @@
+import { normaliserAvatar } from '../domaine/avatar';
 import type { Foyer, MembreId } from '../domaine/types';
 import { estFoyer, type Depot } from './depot';
 
@@ -20,13 +21,18 @@ function ecrire(cle: string, valeur: string): void {
   }
 }
 
+/** Remet à niveau un foyer enregistré par une version précédente (avatars v1…). */
+export function normaliserFoyer(f: Foyer): Foyer {
+  return { ...f, membres: f.membres.map((m) => ({ ...m, avatar: normaliserAvatar(m.avatar) })) };
+}
+
 export const depotLocal: Depot = {
   chargerFoyer() {
     const brut = lire(CLE_FOYER);
     if (!brut) return null;
     try {
       const foyer: unknown = JSON.parse(brut);
-      return estFoyer(foyer) ? (foyer as Foyer) : null;
+      return estFoyer(foyer) ? normaliserFoyer(foyer) : null;
     } catch {
       return null;
     }

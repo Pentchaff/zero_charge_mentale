@@ -78,7 +78,7 @@ function nettoyer(t: Texte | undefined): Texte | undefined {
 }
 
 export function EditeurTache({ tache, estNouvelle, onEnregistrer, onAnnuler }: Props) {
-  const { foyer, t, langue } = useFoyer();
+  const { foyer, membre, t, langue } = useFoyer();
   const [brouillon, setBrouillon] = useState<Tache>(tache);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -113,7 +113,7 @@ export function EditeurTache({ tache, estNouvelle, onEnregistrer, onAnnuler }: P
     if (v === 'commun') return t('tache.commun');
     if (v === 'chacun') return t('tache.chacun');
     const m = foyer.membres.find((x) => `membre:${x.id}` === v);
-    return t('tache.seulement', { prenom: m?.prenom ?? '?' });
+    return m?.id === membre.id ? t('tache.seulementMoi') : t('tache.seulement', { prenom: m?.prenom ?? '?' });
   };
 
   const enregistrer = (ecartee = brouillon.ecartee) => {

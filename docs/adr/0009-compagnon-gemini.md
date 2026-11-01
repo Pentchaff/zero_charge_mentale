@@ -1,10 +1,11 @@
-# Le compagnon parle via l'API Gemini
+# Le compagnon parle via l'API Gemini, appelée depuis le smartphone
 
-Le compagnon ne dit pas des phrases tirées d'une liste : il parle avec un modèle de langage (Gemini) piloté par un prompt système personnel hébergé sur un serveur privé du foyer. Cela lui donne une personnalité cohérente et une capacité à varier ses réponses. Le prompt système définit le ton (ami bienveillant, jamais coach), les interdits (aucune référence au temps écoulé, au nombre de tâches, aucun reproche) et le vocabulaire aligné sur le glossaire du projet.
+Le compagnon parle avec un modèle de langage (Gemini) piloté par un prompt système stocké dans Supabase. La clé API Gemini est stockée sur le smartphone du membre (pas de serveur privé intermédiaire). L'appel part directement du client vers l'API Gemini.
 
-Le serveur privé est nécessaire pour deux raisons : le prompt système contient la personnalité du compagnon (donnée sensible du foyer) et les appels à Gemini nécessitent une clé API qui ne doit pas être exposée côté client.
+Le prompt système définit le ton (ami bienveillant, jamais coach), les interdits (aucune référence au temps écoulé, au nombre de tâches, aucun reproche) et le vocabulaire aligné sur le glossaire du projet.
 
 ## Conséquences
 
-- L'app n'est plus 100 % statique (ADR 0004 reste vrai pour le front, mais un serveur privé entre en jeu pour les réponses du compagnon).
-- Un fallback hors-ligne est nécessaire : quand le serveur ou Gemini est injoignable, le compagnon affiche une animation muette ou une phrase générique pré-enregistrée, sans jamais paraître cassé.
+- Pas de serveur privé à maintenir : l'architecture reste une PWA + Supabase (ADR 0004, ADR 0007).
+- La clé API est exposée côté client. Risque acceptable : l'app est utilisée par deux personnes connues, pas le grand public. Si l'app s'ouvre un jour, il faudra passer par un proxy serveur.
+- Un fallback hors-ligne est nécessaire : quand Gemini est injoignable, le compagnon affiche une animation muette ou une phrase générique pré-enregistrée, sans jamais paraître cassé.

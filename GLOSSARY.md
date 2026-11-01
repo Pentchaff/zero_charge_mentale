@@ -75,3 +75,7 @@ _Avoid_ : pet, animal, mascotte
 **Cycle de vie** :
 L'ensemble des animations et activités autonomes du compagnon, liées à l'heure du jour (dormir, grignoter, regarder par la fenêtre). Le compagnon « existe » même quand le membre ne fait rien.
 _Avoid_ : état, mode, routine
+
+**Émote** :
+Un geste affectueux qu'un membre envoie au compagnon de l'autre : câlin, bisou, pat pat sur la tête. C'est le canal d'attention entre les deux membres du couple. Ce n'est pas un message, c'est un geste.
+_Avoid_ : cadeau, action, message, notification

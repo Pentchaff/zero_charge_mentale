@@ -1,8 +1,9 @@
-# Les compagnons des deux membres peuvent interagir
+# Les compagnons des deux membres interagissent via des émotes
 
-Quand les deux membres sont dans l'app, leurs compagnons jouent ensemble. C'est un canal affectif entre les deux membres du couple : même loin au travail, l'un peut montrer à l'autre qu'il pense à elle via le compagnon. Cette fonctionnalité fait partie de la V1 malgré sa complexité, parce qu'elle répond directement au besoin de présence et de compagnie.
+Quand les deux membres sont dans l'app, leurs écureuils apparaissent côte à côte et font des animations communes. Un membre peut envoyer une émote au compagnon de l'autre : câlin, bisou, pat pat sur la tête. L'autre voit son écureuil recevoir le geste. C'est un canal d'attention, pas de communication : on ne dit rien, on montre qu'on pense à l'autre.
 
 ## Conséquences
 
-- Nécessite la synchronisation temps réel de l'état des compagnons via Supabase (ADR 0007).
+- Synchronisation temps réel de l'état des compagnons via Supabase (ADR 0007).
 - Le compagnon de l'autre n'est visible que lorsqu'il est en ligne : pas de fantôme ni de trace de la dernière connexion (ADR 0005, ADR 0006).
+- L'émote est éphémère : pas d'historique des gestes envoyés.

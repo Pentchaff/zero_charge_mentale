@@ -265,6 +265,21 @@ export const fr = {
   'reglages.inviter': 'Pour inviter quelqu’un dans la maison :',
   'reglages.quitter': 'Quitter la maison sur ce téléphone',
   'reglages.confirmerQuitter': 'Quitter la maison ? Ton avatar et ton Rikki disparaîtront de ce téléphone. Pour revenir, il faudra le code d’invitation.',
+  'alerte.fragile': 'Ce navigateur risque d’oublier ta maison quand tu le fermes.',
+  'alerte.fragileSous': 'Ouvre plutôt Rikki dans Safari (iPhone) ou Chrome (Android), hors navigation privée, puis installe-la sur l’écran d’accueil.',
+  'alerte.installer': 'Astuce : installe Rikki sur l’écran d’accueil (Partager → Sur l’écran d’accueil). L’app installée repart de zéro : utilise ton code de retour (Réglages) pour y retrouver ta maison.',
+  'retour.titre': 'Mon code de retour',
+  'retour.intro': 'Il te permet de retrouver ta maison, ton avatar et ton Rikki si le téléphone oublie tout (navigateur effacé, nouveau téléphone, app installée sur l’écran d’accueil). Fais-en une capture d’écran.',
+  'retour.afficher': 'Afficher mon code de retour',
+  'retour.remplace': 'Chaque nouveau code remplace le précédent.',
+  'retour.copier': 'Copier',
+  'retour.copie': 'Copié !',
+  'retour.garder': 'Garde-le précieusement : c’est ta clé, rien que pour toi.',
+  'retour.bouton': 'J’avais déjà une maison',
+  'retour.maisonPerdue': 'Ce téléphone a oublié qui tu es, mais ta maison est toujours là. Avec ton code de retour, tu la retrouves telle quelle.',
+  'retour.saisir': 'Ton code de retour',
+  'retour.saisirSous': 'Les 12 caractères notés dans Réglages ou sur ta capture d’écran.',
+  'retour.inconnu': 'Ce code de retour ne correspond à personne. Vérifie les caractères ?',
 } as const;
 
 export type Cle = keyof typeof fr;

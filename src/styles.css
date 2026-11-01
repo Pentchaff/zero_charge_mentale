@@ -1360,3 +1360,23 @@ textarea.saisie {
     transform: translate(-50%, 16px);
   }
 }
+
+.alerte-stockage {
+  background: #fdf0d6;
+  color: #6b5326;
+}
+
+.alerte-stockage--douce {
+  background: var(--surface);
+  color: var(--texte);
+  font-size: 0.9rem;
+}
+
+.alerte-stockage p {
+  margin: 4px 0;
+}
+
+.code-retour {
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+}

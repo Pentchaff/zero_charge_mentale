@@ -4,7 +4,8 @@ L'ADR 0007 prévoyait une connexion par lien magique. Sur iPhone, l'app install�
 
 ## Conséquences
 
-- Si le stockage de l'app est effacé, le membre perd son identité : il rejoint à nouveau le foyer avec le code et recrée son avatar. Les tâches et la progression du foyer, elles, restent.
+- Si le stockage de l'app est effacé (navigation privée, navigateur intégré à une messagerie, passage de Safari à l'app installée sur iPhone), le téléphone perd sa session. Chaque membre a donc un **code de retour** personnel de 12 caractères, affiché à la fin de l'inscription et dans les réglages : il rattache le membre existant (avatar, Rikki, avancement personnel) à la nouvelle session. Seule son empreinte est stockée, et en demander un nouveau invalide l'ancien.
+- L'app demande au navigateur un stockage durable et avertit quand elle tourne dans un navigateur qui efface tout à la fermeture.
 - Le code d'invitation est le seul secret du foyer. Il est assez long pour ne pas être deviné, et un foyer est limité à 6 membres.
 - Pour pouvoir récupérer un compte plus tard, on pourra rattacher un e-mail à l'utilisateur anonyme (Supabase le permet) sans changer le modèle de données.
 

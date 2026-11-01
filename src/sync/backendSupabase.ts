@@ -167,6 +167,22 @@ export class BackendSupabase implements Backend {
     return { foyer: await this.chargerDepuisServeur(this.foyerId), membreId };
   }
 
+  async nouveauCodeRetour(): Promise<string> {
+    const { data, error } = await this.sb.rpc('nouveau_code_retour');
+    if (error) throw error;
+    return data as string;
+  }
+
+  async reprendre(code: string) {
+    const membreId = await this.session();
+    const { data, error } = await this.sb.rpc('reprendre_membre', { p_code: code });
+    if (error) throw new Error(error.message.includes('code_retour_inconnu') ? 'code_retour_inconnu' : error.message);
+    this.foyerId = data as string;
+    this.membreId = membreId;
+    depotLocal.sauvegarderMembreActif(membreId);
+    return { foyer: await this.chargerDepuisServeur(this.foyerId), membreId };
+  }
+
   // ------------------------------------------------------------ Envoi
 
   pousser(avant: Foyer, apres: Foyer): void {
@@ -290,10 +306,15 @@ export class BackendSupabase implements Backend {
         }
         const m = membreDepuisLigne(p.new as LigneMembre);
         if (m.id === this.membreId && this.file.has(`m:${m.id}`)) return;
-        appliquer((f) => ({
-          ...f,
-          membres: f.membres.some((x) => x.id === m.id) ? f.membres.map((x) => (x.id === m.id ? m : x)) : [...f.membres, m],
-        }));
+        // Un membre revenu avec son code de retour change d'identifiant.
+        const ancienId = (p.old as { id?: string } | undefined)?.id;
+        appliquer((f) => {
+          const sansAncien = ancienId && ancienId !== m.id ? f.membres.filter((x) => x.id !== ancienId) : f.membres;
+          return {
+            ...f,
+            membres: sansAncien.some((x) => x.id === m.id) ? sansAncien.map((x) => (x.id === m.id ? m : x)) : [...sansAncien, m],
+          };
+        });
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'foyers', filter: `id=eq.${foyerId}` }, (p) => {
         const l = p.new as LigneFoyer;

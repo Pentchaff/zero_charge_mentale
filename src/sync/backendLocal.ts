@@ -77,6 +77,12 @@ export const backendLocal: Backend = {
   async activerNotifications() {
     return 'indisponible';
   },
+  async nouveauCodeRetour() {
+    throw new Error('sans_synchro');
+  },
+  async reprendre() {
+    throw new Error('sans_synchro');
+  },
   async quitter() {
     depotLocal.effacer();
     try {

@@ -96,6 +96,10 @@ _Avoid_ : alarme, alerte, notification, aide-mémoire
 Les 8 caractères qui permettent à un membre de rejoindre un foyer depuis son téléphone (ADR 0024).
 _Avoid_ : mot de passe, identifiant, lien magique
 
+**Code de retour** :
+Les 12 caractères personnels qui permettent à un membre de retrouver sa maison, son avatar et son Rikki quand son téléphone a tout oublié (ADR 0024).
+_Avoid_ : mot de passe, code de récupération, sauvegarde
+
 **Aide-mémoire** :
 Une information pratique que l'app retient pour le foyer et affiche au moment utile. Exemple : « Le chiffon à poussière est dans le deuxième tiroir du meuble TV. » Ce n'est pas une tâche, c'est un contexte.
 _Avoid_ : note, rappel, info, astuce

@@ -3,6 +3,7 @@ import { Accueil } from './ecrans/Accueil';
 import { EcranAvatar } from './ecrans/EcranAvatar';
 import { EditeurTaches } from './ecrans/EditeurTaches';
 import { Onboarding } from './ecrans/Onboarding';
+import { AlerteStockage } from './ecrans/Persistance';
 import { Reglages } from './ecrans/Reglages';
 import { useApp, useFoyer } from './etat/contexte';
 import type { Cle } from './i18n';
@@ -48,6 +49,7 @@ function Coquille() {
       </header>
 
       <main className="contenu" key={`${membre.id}-${onglet}`}>
+        {onglet === 'accueil' && <AlerteStockage t={t} astuce />}
         {onglet === 'accueil' && <Accueil />}
         {onglet === 'avatar' && <EcranAvatar />}
         {onglet === 'taches' && <EditeurTaches />}

@@ -26,5 +26,9 @@ export interface Backend {
   enregistrerRappel(membreId: MembreId, rappel: Rappel): Promise<void>;
   supprimerRappel(membreId: MembreId, id: string): Promise<void>;
   activerNotifications(membreId: MembreId): Promise<ResultatNotifications>;
+  /** Un nouveau code de retour personnel (remplace l'ancien). Synchro seulement. */
+  nouveauCodeRetour(): Promise<string>;
+  /** Retrouver son membre (avatar, Rikki, avancement) avec son code de retour. */
+  reprendre(code: string): Promise<{ foyer: Foyer; membreId: MembreId }>;
   quitter(): Promise<void>;
 }

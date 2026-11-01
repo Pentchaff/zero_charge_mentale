@@ -43,3 +43,27 @@ _Avoid_ : reporter, ignorer, en retard
 **Écarter** :
 La réponse « Je ne fais jamais ça » : la tâche quitte le foyer pour de bon.
 _Avoid_ : supprimer, archiver
+
+## Couple et partage
+
+**Aidant** :
+Le membre du foyer qui paramètre l'app pour l'autre. En V1, c'est le conjoint qui a plus d'énergie.
+_Avoid_ : administrateur, admin, gestionnaire
+
+**Effort** :
+Le poids d'une tâche : léger, moyen ou lourd. Sert à choisir la prochaine action en fonction de l'énergie du membre.
+_Avoid_ : difficulté, priorité, complexité
+
+**Énergie** :
+L'état déclaré par un membre à l'ouverture de l'app (🪫 / 🔋 / ⚡). Facultatif : sans réponse, l'app considère l'énergie basse.
+_Avoid_ : humeur, moral, forme
+
+**Pot commun** :
+L'ensemble des tâches du foyer. Aucune tâche n'est attribuée à un membre en particulier. Ce qui n'est pas pris par l'un revient à l'autre.
+_Avoid_ : pool, file d'attente
+
+## Compagnon
+
+**Compagnon** :
+Un personnage virtuel qui vit dans l'app et dont le membre prend soin. Accomplir une tâche fait du bien au compagnon. Le compagnon ne souffre jamais, ne meurt pas et ne régresse pas si le membre ne fait rien : il attend, content.
+_Avoid_ : pet, animal, mascotte, avatar, Tamagotchi

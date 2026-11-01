@@ -26,6 +26,10 @@ _Avoid_ : routine, objectif, tâche
 Un grand pan du quotidien qui regroupe des tâches. En V1 : logement, linge, repas et courses, soins de base.
 _Avoid_ : catégorie, thème
 
+**Tâche personnelle** :
+Une tâche que chaque membre fait pour lui-même (se brosser les dents, manger). Son avancement est suivi par membre et n'est jamais montré (ADR 0021).
+_Avoid_ : tâche individuelle, habitude, routine
+
 **Foyer type** :
 L'ensemble de tâches pré-remplies avec lequel l'app démarre, avant tout ajustement par le foyer.
 _Avoid_ : template, configuration par défaut, modèle
@@ -59,7 +63,7 @@ L'état déclaré par un membre à l'ouverture de l'app (🪫 / 🔋 / ⚡). Fac
 _Avoid_ : humeur, moral, forme
 
 **Pot commun** :
-L'ensemble des tâches du foyer. Aucune tâche n'est attribuée à un membre en particulier. Ce qui n'est pas pris par l'un revient à l'autre.
+L'ensemble des tâches du foyer. Aucune tâche n'est attribuée à un membre en particulier. Ce qui n'est pas pris par l'un revient à l'autre. Exceptions : les tâches personnelles et les tâches réservées à un membre (ADR 0016).
 _Avoid_ : pool, file d'attente
 
 ## Compagnon

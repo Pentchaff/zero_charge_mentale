@@ -91,3 +91,11 @@ _Avoid_ : note, rappel, info, astuce
 **Rikki** :
 Le nom du compagnon (l'écureuil). C'est aussi le nom de l'app sur l'écran d'accueil.
 _Avoid_ : Zéro Charge Mentale, ZCM, l'app
+
+**Avatar** :
+Un personnage humain mignon en SVG qui représente le membre dans l'app, style Mii. Créé à l'onboarding avec un éditeur simple (visage, cheveux, couleur). C'est l'avatar qui accomplit les micro-étapes et qui interagit avec l'avatar de l'autre membre (émotes). Le compagnon (Rikki) est le pet de l'avatar.
+_Avoid_ : profil, personnage, Mii, icône
+
+**Éditeur d'avatar** :
+L'écran de création de l'avatar : quelques curseurs et choix visuels (forme du visage, coiffure, couleur de peau, yeux, accessoires). Aussi simple que l'éditeur Mii. Accessible à l'onboarding et modifiable plus tard.
+_Avoid_ : character creator, personnalisation

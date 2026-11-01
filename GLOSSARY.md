@@ -26,6 +26,10 @@ _Avoid_ : routine, objectif, tâche
 Un grand pan du quotidien qui regroupe des tâches. En V1 : logement, linge, repas et courses, soins de base.
 _Avoid_ : catégorie, thème
 
+**Tâche personnelle** :
+Une tâche que chaque membre fait pour lui-même (se brosser les dents, manger). Son avancement est suivi par membre et n'est jamais montré (ADR 0021).
+_Avoid_ : tâche individuelle, habitude, routine
+
 **Foyer type** :
 L'ensemble de tâches pré-remplies avec lequel l'app démarre, avant tout ajustement par le foyer.
 _Avoid_ : template, configuration par défaut, modèle
@@ -59,7 +63,7 @@ L'état déclaré par un membre à l'ouverture de l'app (🪫 / 🔋 / ⚡). Fac
 _Avoid_ : humeur, moral, forme
 
 **Pot commun** :
-L'ensemble des tâches du foyer. Aucune tâche n'est attribuée à un membre en particulier. Ce qui n'est pas pris par l'un revient à l'autre.
+L'ensemble des tâches du foyer. Aucune tâche n'est attribuée à un membre en particulier. Ce qui n'est pas pris par l'un revient à l'autre. Exceptions : les tâches personnelles et les tâches réservées à un membre (ADR 0016).
 _Avoid_ : pool, file d'attente
 
 ## Compagnon
@@ -83,6 +87,14 @@ _Avoid_ : cadeau, action, message, notification
 **Micro-étape** :
 Un geste concret et faisable en quelques minutes, qui fait partie d'une tâche plus grosse. « Nettoyer la salle de bain » n'est pas une micro-étape. « Passer un coup de produit à vitre sur le miroir » en est une. L'app propose les micro-étapes une par une, jamais la tâche entière.
 _Avoid_ : sous-tâche, étape, action, step
+
+**Rappel** :
+Un message personnel qu'un membre se programme à une heure donnée (« rappel du matin »). Désactivé par défaut, jamais visible par l'autre, sans nom de médicament (ADR 0006, ADR 0007).
+_Avoid_ : alarme, alerte, notification, aide-mémoire
+
+**Code d'invitation** :
+Les 8 caractères qui permettent à un membre de rejoindre un foyer depuis son téléphone (ADR 0024).
+_Avoid_ : mot de passe, identifiant, lien magique
 
 **Aide-mémoire** :
 Une information pratique que l'app retient pour le foyer et affiche au moment utile. Exemple : « Le chiffon à poussière est dans le deuxième tiroir du meuble TV. » Ce n'est pas une tâche, c'est un contexte.

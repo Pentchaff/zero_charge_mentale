@@ -79,3 +79,15 @@ _Avoid_ : état, mode, routine
 **Émote** :
 Un geste affectueux qu'un membre envoie au compagnon de l'autre : câlin, bisou, pat pat sur la tête. C'est le canal d'attention entre les deux membres du couple. Ce n'est pas un message, c'est un geste.
 _Avoid_ : cadeau, action, message, notification
+
+**Micro-étape** :
+Un geste concret et faisable en quelques minutes, qui fait partie d'une tâche plus grosse. « Nettoyer la salle de bain » n'est pas une micro-étape. « Passer un coup de produit à vitre sur le miroir » en est une. L'app propose les micro-étapes une par une, jamais la tâche entière.
+_Avoid_ : sous-tâche, étape, action, step
+
+**Aide-mémoire** :
+Une information pratique que l'app retient pour le foyer et affiche au moment utile. Exemple : « Le chiffon à poussière est dans le deuxième tiroir du meuble TV. » Ce n'est pas une tâche, c'est un contexte.
+_Avoid_ : note, rappel, info, astuce
+
+**Rikki** :
+Le nom du compagnon (l'écureuil). C'est aussi le nom de l'app sur l'écran d'accueil.
+_Avoid_ : Zéro Charge Mentale, ZCM, l'app

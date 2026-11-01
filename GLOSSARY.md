@@ -99,3 +99,7 @@ _Avoid_ : profil, personnage, Mii, icône
 **Éditeur d'avatar** :
 L'écran de création de l'avatar : quelques curseurs et choix visuels (forme du visage, coiffure, couleur de peau, yeux, accessoires). Aussi simple que l'éditeur Mii. Accessible à l'onboarding et modifiable plus tard.
 _Avoid_ : character creator, personnalisation
+
+**Maison** :
+Le décor dans lequel vivent l'avatar et Rikki : une représentation simplifiée du vrai logement du foyer (pièces, meubles, couleurs). La maison évolue avec les tâches accomplies (nouveaux meubles, décorations). C'est le « monde » de l'app.
+_Avoid_ : arrière-plan, décor, scène, environnement

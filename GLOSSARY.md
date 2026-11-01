@@ -67,3 +67,11 @@ _Avoid_ : pool, file d'attente
 **Compagnon** :
 Un personnage virtuel qui vit dans l'app et dont le membre prend soin. Accomplir une tâche fait du bien au compagnon. Le compagnon ne souffre jamais, ne meurt pas et ne régresse pas si le membre ne fait rien : il attend, content.
 _Avoid_ : pet, animal, mascotte, avatar, Tamagotchi
+
+**Écureuil** :
+La forme du compagnon en V1. Un seul design pour tous les membres, en SVG animé.
+_Avoid_ : pet, animal, mascotte
+
+**Cycle de vie** :
+L'ensemble des animations et activités autonomes du compagnon, liées à l'heure du jour (dormir, grignoter, regarder par la fenêtre). Le compagnon « existe » même quand le membre ne fait rien.
+_Avoid_ : état, mode, routine

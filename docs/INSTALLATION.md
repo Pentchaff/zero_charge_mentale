@@ -11,8 +11,10 @@ Ce guide part de zéro et compte environ 30 minutes. Les étapes 1 à 7 suffisen
 ## 2. Créer les tables (2 min)
 
 1. Menu de gauche : **SQL Editor** → **New query**.
-2. Coller tout le contenu de [`supabase/migrations/20261101000000_rikki.sql`](../supabase/migrations/20261101000000_rikki.sql).
-3. **Run**. Le message attendu est « Success. No rows returned ». Le script peut être relancé sans danger.
+2. Coller tout le contenu de [`supabase/migrations/20261101000000_rikki.sql`](../supabase/migrations/20261101000000_rikki.sql), puis **Run**. Le message attendu est « Success. No rows returned ».
+3. Nouvelle requête : coller [`supabase/migrations/20261102000000_code_retour.sql`](../supabase/migrations/20261102000000_code_retour.sql) (le code de retour), puis **Run**.
+
+Les deux scripts peuvent être relancés sans danger. Si tu avais déjà exécuté le premier, il suffit d'exécuter le second.
 
 ## 3. Autoriser la connexion anonyme (1 min)
 
@@ -63,6 +65,8 @@ Pour vérifier que la synchro est bien branchée : sur l'écran d'accueil de l'a
 1. Elle ouvre le lien reçu dans **Safari**.
 2. **Partager** → **Sur l'écran d'accueil** → **Ajouter**.
 3. Elle ouvre **Rikki** depuis l'écran d'accueil → **日本語** → **コードで参加する** → elle tape le code → prénom, avatar, nom de son Rikki.
+
+À la fin de l'inscription, chacun voit son **code de retour** (12 caractères) : faites-en une capture d'écran. Il permet de retrouver sa maison, son avatar et son Rikki si le téléphone oublie tout. Il reste disponible dans **Réglages → Mon code de retour**.
 
 C'est tout : vous partagez maintenant la même maison. Quand vous avez tous les deux l'app ouverte, l'avatar de l'autre apparaît dans la pièce ; touchez-le (ou le bouton 💌) pour envoyer un câlin, un bisou ou un pat pat. Si l'autre n'a pas l'app ouverte, le geste l'attend et s'affiche à sa prochaine ouverture.
 
@@ -118,6 +122,7 @@ Sans `.env.local`, l'app tourne entièrement sur l'appareil, sans compte (pratiq
 | --- | --- |
 | « Rikki n'arrive pas à se réveiller » + `connexion_anonyme` | L'étape 3 n'est pas faite. |
 | « Ce code ne correspond à aucune maison » | Vérifier les 8 caractères (le tiret est facultatif). |
-| La maison de ma femme est vide / pas la même | Elle a commencé dans Safari puis installé l'app : sur iPhone, ce sont deux espaces séparés. Dans l'app installée, **Réglages → Quitter la maison**, puis rejoindre à nouveau avec le code. |
+| Il faut tout refaire en rouvrant l'app | Le navigateur efface ses données à la fermeture : **navigation privée** de Safari, ou lien ouvert **dans LINE, Messenger, Gmail…** (navigateur intégré, l'app affiche alors un avertissement). Ouvrir le lien dans Safari normal, installer sur l'écran d'accueil, puis **J'avais déjà une maison** avec le code de retour. |
+| La maison est vide après avoir installé l'app sur l'iPhone | Sur iPhone, Safari et l'app installée sont deux espaces séparés. Dans l'app installée : **J'avais déjà une maison** → code de retour. |
 | « Pas disponible ici » pour les notifications | Sur iPhone, ouvrir Rikki depuis l'écran d'accueil (pas depuis Safari), iOS 16.4 ou plus récent, et l'étape 8.2 faite. |
 | Les rappels ne sonnent pas | Étapes 8.3 à 8.5 ; dans Supabase, **Edge Functions → rikki-push → Logs** doit montrer un appel par minute. |

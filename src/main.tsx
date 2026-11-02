@@ -3,9 +3,13 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { AVEC_SYNCHRO } from './config';
 import { FournisseurApp } from './etat/contexte';
+import { demanderStockageDurable } from './stockage/persistance';
 import { backendLocal } from './sync/backendLocal';
 import { BackendSupabase } from './sync/backendSupabase';
 import './styles.css';
+
+// Demande au navigateur de ne pas effacer la maison (Chrome, Firefox, Android).
+void demanderStockageDurable();
 
 const backend = AVEC_SYNCHRO ? new BackendSupabase() : backendLocal;
 

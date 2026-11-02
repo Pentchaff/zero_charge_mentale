@@ -2,8 +2,10 @@
 // prochaine action (ADR 0002). En mode 🪫, aucune tâche : juste de la
 // présence (ADR 0012). Quand l'autre membre a l'app ouverte, son avatar
 // apparaît dans la pièce et l'on peut lui envoyer une émote (ADR 0011).
+// Les personnages vivent dans la maison (activités, marche) et les émotes
+// se jouent entre eux (ADR 0026) : voir ui/maison/scene.ts.
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { activiteSelonHeure, momentSelonHeure, type ActiviteRikki } from '../compagnon/cycleDeVie';
 import { parole } from '../compagnon/gemini';
 import type { Situation } from '../compagnon/phrases';
@@ -13,11 +15,28 @@ import { accessoiresRikki, decorationsDebloquees, nouvellesRecompenses, tailleRi
 import type { Energie, Membre, PieceId, TypeEmote } from '../domaine/types';
 import { useFoyer } from '../etat/contexte';
 import { texteDans, type Cle } from '../i18n';
-import { Avatar, type PoseAvatar } from '../ui/avatar/Avatar';
 import { Toast, type Annonce } from '../ui/commun';
-import { positionEcran } from '../ui/maison/iso';
+import { EffetScene, HabitantAvatar, HabitantRikki } from '../ui/maison/Habitants';
 import { Maison } from '../ui/maison/Maison';
-import { Rikki, type EtatRikki } from '../ui/rikki/Rikki';
+import {
+  activitesPossibles,
+  choisirActivite,
+  dureeScript,
+  ENTREE,
+  gesteDeLaTache,
+  placementDebout,
+  POSTES,
+  scriptActivite,
+  scriptAttente,
+  scriptEmoteParRikki,
+  scriptFait,
+  scriptsEmoteEnDirect,
+  type Etape,
+  type IdActivite,
+  type Placement,
+} from '../ui/maison/scene';
+import { useActeur, type EtatActeur } from '../ui/maison/useActeur';
+import type { EtatRikki } from '../ui/rikki/Rikki';
 import { BandeauRappels } from './BandeauRappels';
 
 const ENERGIES: { id: Energie; icone: string }[] = [
@@ -49,9 +68,20 @@ function useMaintenant(): number {
   return maintenant;
 }
 
-function styleSol(x: number, y: number): CSSProperties {
-  const p = positionEcran(x, y);
-  return { ...p, zIndex: Math.round(parseFloat(p.top) * 10) };
+/** Un personnage qui entre dans la pièce par le bord, côté spectateur. */
+function departEntree(): EtatActeur {
+  const p = placementDebout(ENTREE);
+  return { perso: p, rikki: { x: ENTREE.x + 0.4, y: ENTREE.y - 0.6, z: 0, duree: 0 }, effet: null };
+}
+
+function entrer(): Etape {
+  const d = departEntree();
+  return { perso: d.perso, rikki: d.rikki, ms: 30 };
+}
+
+/** Durée d'une activité : assez pour qu'on la voie vivre, assez court pour que la maison bouge. */
+function dureeActivite(): number {
+  return 11_000 + Math.round(Math.random() * 9_000);
 }
 
 export function Accueil() {
@@ -61,13 +91,12 @@ export function Accueil() {
   const heure = new Date(maintenant).getHours();
 
   const [quandMeme, setQuandMeme] = useState(false);
-  const [pose, setPose] = useState<PoseAvatar | null>(null);
-  const [joie, setJoie] = useState(false);
   const [bulle, setBulle] = useState('');
   const [annonce, setAnnonce] = useState<Annonce | null>(null);
   const [pieceVisitee, setPieceVisitee] = useState<PieceId | null>(null);
+  // Pendant un geste (« Fait », émote), on reste dans la pièce même si la micro-étape suivante est ailleurs.
+  const [pieceRetenue, setPieceRetenue] = useState<PieceId | null>(null);
   const [destinataire, setDestinataire] = useState<Membre | null>(null);
-  const [envol, setEnvol] = useState<{ icone: string; cle: number; vers: 'autre' | 'moi' } | null>(null);
   const minuteurs = useRef<number[]>([]);
   const numeroParole = useRef(0);
 
@@ -90,16 +119,81 @@ export function Accueil() {
     !action && session.exclues.size > 0 && candidates(foyer, membre.id, energie, maintenant, { ignorerEcheance: quandMeme }).length > 0;
 
   const activite = activiteSelonHeure(heure);
+  const moment = momentSelonHeure(heure);
   const modeRepos = energieDeclaree && energie === 'vide';
-  const etatRikki: EtatRikki = joie ? 'joie' : modeRepos ? 'calin' : activite;
-  const poseAvatar: PoseAvatar = pose ?? (modeRepos ? 'calin' : 'repos');
+  const etatRikki: EtatRikki = modeRepos ? 'calin' : activite;
+  const decorations = useMemo(() => decorationsDebloquees(foyer.compteur), [foyer.compteur]);
 
   // Rikki change de pièce avec la micro-étape (ADR 0019) ; sinon il suit sa journée.
   const pieceAuto = action?.tache.piece ?? (modeRepos ? 'chambre' : PIECE_SELON_ACTIVITE[activite]);
   const piecesMaison = foyer.maison.pieces.length ? foyer.maison.pieces : (['salon'] as PieceId[]);
-  const piece = pieceVisitee ?? (piecesMaison.includes(pieceAuto) ? pieceAuto : piecesMaison[0]);
+  const piece = pieceVisitee ?? pieceRetenue ?? (piecesMaison.includes(pieceAuto) ? pieceAuto : piecesMaison[0]);
+  // Une micro-étape de cette pièce est proposée : l'avatar attend à son poste, prêt.
+  const auPoste = action !== null && action.tache.piece === piece;
 
   useEffect(() => setPieceVisitee(null), [action?.tache.id]);
+
+  // ---------------------------------------------------------------- Mise en scène
+
+  // Ce que les acteurs lisent quand ils choisissent la suite (toujours à jour).
+  const contexte = useRef({ piece, auPoste, calme: modeRepos, moment, decorations });
+  contexte.current = { piece, auPoste, calme: modeRepos, moment, decorations };
+  const activiteMoi = useRef<IdActivite | null>(null);
+  const activiteAutre = useRef<IdActivite | null>(null);
+  // Pendant un geste (émote, « Fait »), rien ne vient l'interrompre.
+  const occupeJusqua = useRef(0);
+
+  const prochaineActivite = (depuis: Placement, mienne: { current: IdActivite | null }, autre: { current: IdActivite | null }): Etape[] => {
+    const c = contexte.current;
+    const possibles = activitesPossibles(c.piece, { moment: c.moment, calme: c.calme, decorations: c.decorations });
+    const choisie = choisirActivite(possibles, Math.random(), [mienne.current, autre.current].filter((a): a is IdActivite => a !== null));
+    mienne.current = choisie?.id ?? null;
+    return choisie ? scriptActivite(depuis, choisie, dureeActivite()) : scriptAttente(depuis, POSTES[c.piece], 20_000);
+  };
+
+  const moi = useActeur(departEntree, (depuis) =>
+    contexte.current.auPoste ? scriptAttente(depuis, POSTES[contexte.current.piece], 60_000) : prochaineActivite(depuis, activiteMoi, activiteAutre),
+  );
+  // L'autre n'a plus l'app ouverte : son avatar ne joue plus rien (il n'est plus affiché).
+  const autreLa = useRef(false);
+  autreLa.current = autreVisible !== null;
+  const lui = useActeur(departEntree, (depuis) =>
+    autreLa.current ? prochaineActivite(depuis, activiteAutre, activiteMoi) : [{ perso: depuis, ms: 60_000 }],
+  );
+
+  /** Un geste commence : rien ne l'interrompt, et l'on reste dans la pièce jusqu'à sa fin. */
+  const occuper = (etapes: Etape[]) => {
+    const duree = dureeScript(etapes);
+    occupeJusqua.current = Date.now() + duree;
+    setPieceRetenue(piece);
+    plusTard(() => {
+      if (Date.now() >= occupeJusqua.current - 50) setPieceRetenue(null);
+    }, duree);
+  };
+
+  // Changement de pièce : on y entre par le bord. Sinon, on reprend la suite là où l'on est.
+  const pieceJouee = useRef<PieceId | null>(null);
+  useEffect(() => {
+    const nouvellePiece = pieceJouee.current !== piece;
+    pieceJouee.current = piece;
+    if (nouvellePiece) {
+      occupeJusqua.current = 0;
+      activiteMoi.current = null;
+      moi.jouer([entrer()]);
+      if (autreVisible) lui.jouer([entrer()]);
+      return;
+    }
+    if (Date.now() < occupeJusqua.current) return;
+    activiteMoi.current = null;
+    moi.jouer([]);
+  }, [piece, auPoste, modeRepos, action?.tache.id]);
+
+  // L'autre ouvre l'app : son avatar entre dans la pièce.
+  useEffect(() => {
+    if (!autreVisible) return;
+    activiteAutre.current = null;
+    lui.jouer([entrer()]);
+  }, [autreVisible?.id]);
 
   const dire = useCallback(
     (situation: Situation, geste?: string) => {
@@ -121,17 +215,29 @@ export function Accueil() {
     if (energieDeclaree && energie !== 'vide' && !action && !toutRepousse) dire('tranquille');
   }, [energieDeclaree, energie, action === null, toutRepousse]);
 
-  // Une émote arrive : l'avatar la reçoit, Rikki la raconte.
+  /** Joue une émote : entre les deux avatars si l'autre est là, sinon avec Rikki. */
+  const jouerEmote = (type: TypeEmote, sens: 'envoi' | 'reception', enDirect: boolean) => {
+    if (enDirect) {
+      const scripts =
+        sens === 'envoi' ? scriptsEmoteEnDirect(type, moi.ici(), lui.ici()) : scriptsEmoteEnDirect(type, lui.ici(), moi.ici());
+      const [miens, siens] = sens === 'envoi' ? [scripts.envoyeur, scripts.receveur] : [scripts.receveur, scripts.envoyeur];
+      occuper(miens);
+      moi.jouer(miens);
+      lui.jouer(siens);
+    } else {
+      const etapes = scriptEmoteParRikki(type, moi.ici(), sens);
+      occuper(etapes);
+      moi.jouer(etapes);
+    }
+  };
+
+  // Une émote arrive : elle se joue dans la maison, Rikki la raconte.
   useEffect(() => {
     if (!emoteRecue) return;
     const de = foyer.membres.find((m) => m.id === emoteRecue.de);
-    const icone = EMOTES.find((e) => e.id === emoteRecue.type)?.icone ?? '💕';
     numeroParole.current++;
     setBulle(t(`emote.recue.${emoteRecue.type}` as Cle, { de: de?.prenom ?? '' }));
-    setPose('content');
-    setEnvol({ icone, cle: Date.now(), vers: 'moi' });
-    plusTard(() => setPose(null), 3500);
-    plusTard(() => setEnvol(null), 3000);
+    jouerEmote(emoteRecue.type, 'reception', autreVisible !== null && emoteRecue.de === autreVisible.id);
     plusTard(app.oublierEmote, 3600);
   }, [emoteRecue]);
 
@@ -139,11 +245,10 @@ export function Accueil() {
     if (!action) return;
     const avant = foyer.compteur;
     const { foyer: suivant, tacheTerminee } = marquerFait(foyer, action.tache.id, membre.id, Date.now());
+    const etapes = scriptFait(moi.ici(), gesteDeLaTache(action.tache.domaine, action.tache.piece));
+    occuper(etapes);
+    moi.jouer(etapes);
     modifierFoyer(() => suivant);
-    setPose('fait');
-    setJoie(true);
-    plusTard(() => setPose(null), 1200);
-    plusTard(() => setJoie(false), 1800);
     dire(tacheTerminee ? 'tacheTerminee' : 'fait', texteDans(action.etape.texte, langue));
     const gagnees = nouvellesRecompenses(avant, suivant.compteur);
     if (gagnees.length) {
@@ -176,11 +281,7 @@ export function Accueil() {
 
   const envoyer = async (vers: Membre, type: TypeEmote) => {
     setDestinataire(null);
-    const icone = EMOTES.find((e) => e.id === type)?.icone ?? '💕';
-    setPose('calin');
-    setEnvol({ icone, cle: Date.now(), vers: 'autre' });
-    plusTard(() => setPose(null), 1500);
-    plusTard(() => setEnvol(null), 1800);
+    jouerEmote(type, 'envoi', autreVisible !== null && vers.id === autreVisible.id);
     try {
       await app.envoyerEmote(vers.id, type);
       numeroParole.current++;
@@ -197,15 +298,12 @@ export function Accueil() {
 
   const finAnnonce = useCallback(() => setAnnonce(null), []);
 
-  // Placement dans la pièce (unités isométriques). Avec l'autre membre, on se pousse un peu.
-  const moi = autreVisible ? { x: 3.3, y: 6.1 } : { x: 3.8, y: 5.6 };
-  const monRikki = autreVisible ? { x: 5.1, y: 6.7 } : { x: 5.6, y: 5.9 };
-  const lui = { x: 6.8, y: 4.8 };
-  const sonRikki = { x: 6.7, y: 3.5 };
+  const taille = tailleRikki(foyer.compteur);
+  const accessoires = useMemo(() => accessoiresRikki(foyer.compteur), [foyer.compteur]);
 
   return (
     <div className="ecran ecran-accueil">
-      <Maison piece={piece} couleurMurs={foyer.maison.couleurMurs} moment={momentSelonHeure(heure)} decorations={decorationsDebloquees(foyer.compteur)}>
+      <Maison piece={piece} couleurMurs={foyer.maison.couleurMurs} moment={moment} decorations={decorations}>
         {bulle && (
           <div className="bulle" key={bulle} aria-live="polite">
             {bulle}
@@ -216,41 +314,24 @@ export function Accueil() {
             💌
           </button>
         )}
-        <div className={`habitant habitant-avatar habitant--${poseAvatar}`} style={styleSol(moi.x, moi.y)}>
-          <Avatar config={membre.avatar} pose={poseAvatar} titre={membre.prenom} />
-        </div>
-        <div className="habitant habitant-rikki" style={styleSol(monRikki.x, monRikki.y)}>
-          <Rikki etat={etatRikki} taille={tailleRikki(foyer.compteur)} accessoires={accessoiresRikki(foyer.compteur)} titre={membre.nomRikki} />
-        </div>
+        <HabitantAvatar placement={moi.etat.perso} config={membre.avatar} titre={membre.prenom} />
+        <HabitantRikki placement={moi.etat.rikki} etat={etatRikki} taille={taille} accessoires={accessoires} titre={membre.nomRikki} />
+        {moi.etat.effet && <EffetScene key={moi.etat.effet.cle} effet={moi.etat.effet} />}
         {autreVisible && (
           <>
-            <button
-              type="button"
-              className="habitant habitant-avatar habitant-autre"
-              style={styleSol(lui.x, lui.y)}
-              aria-label={t('emote.envoyerA', { prenom: autreVisible.prenom })}
+            <HabitantAvatar
+              placement={lui.etat.perso}
+              config={autreVisible.avatar}
+              titre={autreVisible.prenom}
+              etiquette={autreVisible.prenom}
+              libelle={t('emote.envoyerA', { prenom: autreVisible.prenom })}
               onClick={() => setDestinataire(autreVisible)}
-            >
-              <Avatar config={autreVisible.avatar} pose={emoteRecue?.de === autreVisible.id ? 'calin' : 'repos'} titre={autreVisible.prenom} />
-              <span className="etiquette-prenom">{autreVisible.prenom}</span>
-            </button>
-            <div className="habitant habitant-rikki habitant-rikki--autre" style={styleSol(sonRikki.x, sonRikki.y)}>
-              <Rikki etat={activite === 'dort' ? 'dort' : 'eveille'} taille={tailleRikki(foyer.compteur) * 0.85} accessoires={accessoiresRikki(foyer.compteur)} />
-            </div>
+            />
+            <HabitantRikki placement={lui.etat.rikki} etat={activite === 'dort' ? 'dort' : 'eveille'} taille={taille * 0.85} accessoires={accessoires} autre />
+            {lui.etat.effet && <EffetScene key={lui.etat.effet.cle} effet={lui.etat.effet} />}
           </>
         )}
-        {envol && (
-          <span
-            key={envol.cle}
-            className={`envol-emote envol-emote--${envol.vers === 'moi' ? 'recue' : autreVisible ? 'vers-autre' : 'envoyee'}`}
-            style={envol.vers === 'moi' ? positionEcran(moi.x, moi.y, 3.2) : positionEcran(moi.x, moi.y, 3)}
-            aria-hidden="true"
-          >
-            {envol.icone}
-          </span>
-        )}
       </Maison>
-
       {piecesMaison.length > 1 && (
         <div className="pieces" role="tablist">
           {piecesMaison.map((p) => (

@@ -12,7 +12,9 @@ import { useApp } from '../etat/contexte';
 import { creerTraduire, LANGUES, type Traduire } from '../i18n';
 import { Avatar } from '../ui/avatar/Avatar';
 import { Rikki } from '../ui/rikki/Rikki';
+import { depotLocal } from '../stockage/depotLocal';
 import { EditeurAvatar } from './EditeurAvatar';
+import { AlerteStockage, BlocCodeRetour, formaterCodeRetour } from './Persistance';
 
 const NOM_RIKKI: Record<Langue, string> = { fr: 'Rikki', ja: 'リッキー' };
 
@@ -201,7 +203,7 @@ export function CreationMembre({
   );
 }
 
-type Etape = 'langue' | 'choix' | 'code' | 'rejoindre' | 'combien' | 'premier' | 'invitation' | 'second' | 'fini';
+type Etape = 'langue' | 'choix' | 'retour' | 'code' | 'rejoindre' | 'combien' | 'premier' | 'invitation' | 'second' | 'fini';
 
 function codeDansAdresse(): string {
   try {
@@ -221,6 +223,9 @@ export function Onboarding() {
   const [code, setCode] = useState(codeDansAdresse);
   const [erreur, setErreur] = useState<string | null>(null);
   const [occupe, setOccupe] = useState(false);
+  const [codeRetour, setCodeRetour] = useState('');
+  // Ce téléphone avait une maison mais a perdu sa session : on propose de la retrouver.
+  const [maisonPerdue] = useState(() => synchro && depotLocal.chargerFoyer() !== null);
 
   const premier = foyer?.membres.find((m) => m.id === membreActif) ?? foyer?.membres[0];
 
@@ -235,6 +240,20 @@ export function Onboarding() {
       setEtape(aDeux ? 'invitation' : 'fini');
     } catch (e) {
       setErreur(t('erreur.reseau', { detail: e instanceof Error ? e.message : String(e) }));
+    } finally {
+      setOccupe(false);
+    }
+  };
+
+  const reprendre = async () => {
+    setOccupe(true);
+    setErreur(null);
+    try {
+      const r = await backend.reprendre(codeRetour);
+      installerFoyer(r.foyer, r.membreId);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      setErreur(message === 'code_retour_inconnu' ? t('retour.inconnu') : t('erreur.reseau', { detail: message }));
     } finally {
       setOccupe(false);
     }
@@ -264,6 +283,7 @@ export function Onboarding() {
         <div className="onboarding-etape">
           <Rikki etat="eveille" className="onboarding-rikki" />
           <h1>{t('onboarding.bonjour')}</h1>
+          <AlerteStockage t={t} />
           <AideInstallation t={t} />
           <p>{t('onboarding.langue')}</p>
           <ChoixLangue
@@ -279,15 +299,55 @@ export function Onboarding() {
         <div className="onboarding-etape">
           <Rikki etat="eveille" className="onboarding-rikki" />
           <h1>{t('onboarding.bienvenue')}</h1>
+          {maisonPerdue && <p className="message-doux">{t('retour.maisonPerdue')}</p>}
           <div className="choix-langue">
+            {maisonPerdue && (
+              <button type="button" className="bouton bouton--grand" onClick={() => setEtape('retour')}>
+                🔑 {t('retour.bouton')}
+              </button>
+            )}
             <button type="button" className="bouton bouton--grand" onClick={() => setEtape('combien')}>
               🏡 {t('onboarding.creer')}
             </button>
             <button type="button" className="bouton bouton--grand" onClick={() => setEtape('code')}>
               💌 {t('onboarding.rejoindre')}
             </button>
+            {!maisonPerdue && (
+              <button type="button" className="bouton-lien" onClick={() => setEtape('retour')}>
+                🔑 {t('retour.bouton')}
+              </button>
+            )}
           </div>
         </div>
+      )}
+
+      {etape === 'retour' && (
+        <form
+          className="onboarding-etape"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (codeRetour.length >= 12) void reprendre();
+          }}
+        >
+          <h1>{t('retour.saisir')}</h1>
+          <p>{t('retour.saisirSous')}</p>
+          <input
+            className="saisie saisie--grande saisie--code"
+            autoFocus
+            autoCapitalize="characters"
+            autoComplete="off"
+            value={formaterCodeRetour(codeRetour)}
+            placeholder="ABCD-1234-EF56"
+            onChange={(e) => setCodeRetour(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 12).toUpperCase())}
+          />
+          {erreur && <p className="message-doux">{erreur}</p>}
+          <button type="submit" className="bouton bouton--principal bouton--large" disabled={codeRetour.length < 12 || occupe}>
+            {occupe ? '…' : t('commun.suivant')}
+          </button>
+          <button type="button" className="bouton-lien" onClick={() => (setErreur(null), setEtape('choix'))}>
+            {t('commun.retour')}
+          </button>
+        </form>
       )}
 
       {etape === 'code' && (
@@ -397,6 +457,13 @@ export function Onboarding() {
           </div>
           <h1>{t('onboarding.cestParti')}</h1>
           <p>{t('onboarding.pret', { rikki: premier.nomRikki })}</p>
+          {synchro && (
+            <div className="carte">
+              <p className="carte-repos-titre">🔑 {t('retour.titre')}</p>
+              <p className="champ-aide">{t('retour.intro')}</p>
+              <BlocCodeRetour automatique />
+            </div>
+          )}
           <button type="button" className="bouton bouton--principal bouton--large" onClick={() => installerFoyer(foyer, premier.id)}>
             {t('onboarding.cestParti')}
           </button>

@@ -96,6 +96,10 @@ _Avoid_ : alarme, alerte, notification, aide-mémoire
 Les 8 caractères qui permettent à un membre de rejoindre un foyer depuis son téléphone (ADR 0024).
 _Avoid_ : mot de passe, identifiant, lien magique
 
+**Code de retour** :
+Les 12 caractères personnels qui permettent à un membre de retrouver sa maison, son avatar et son Rikki quand son téléphone a tout oublié (ADR 0024).
+_Avoid_ : mot de passe, code de récupération, sauvegarde
+
 **Aide-mémoire** :
 Une information pratique que l'app retient pour le foyer et affiche au moment utile. Exemple : « Le chiffon à poussière est dans le deuxième tiroir du meuble TV. » Ce n'est pas une tâche, c'est un contexte.
 _Avoid_ : note, rappel, info, astuce
@@ -107,6 +111,10 @@ _Avoid_ : Zéro Charge Mentale, ZCM, l'app
 **Avatar** :
 Un personnage humain mignon en SVG qui représente le membre dans l'app, style Mii. Créé à l'onboarding avec un éditeur simple (visage, cheveux, couleur). C'est l'avatar qui accomplit les micro-étapes et qui interagit avec l'avatar de l'autre membre (émotes). Le compagnon (Rikki) est le pet de l'avatar.
 _Avoid_ : profil, personnage, Mii, icône
+
+**Activité** :
+Ce que fait un avatar dans la maison quand il n'accomplit pas de micro-étape : lire sur le canapé, boire un thé, cuisiner, prendre un bain, dormir, faire un câlin à Rikki. Elle dépend de la pièce, de l'heure et des décorations débloquées ; en mode 🪫, seulement des activités calmes. Ce n'est jamais une tâche déguisée : l'avatar ne fait pas le ménage tout seul.
+_Avoid_ : animation, occupation, cycle de vie (réservé à Rikki), tâche
 
 **Éditeur d'avatar** :
 L'écran de création de l'avatar : quelques curseurs et choix visuels (forme du visage, coiffure, couleur de peau, yeux, accessoires). Aussi simple que l'éditeur Mii. Accessible à l'onboarding et modifiable plus tard.

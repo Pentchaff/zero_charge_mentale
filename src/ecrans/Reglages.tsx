@@ -14,6 +14,7 @@ import { Avatar } from '../ui/avatar/Avatar';
 import { Champ, Puces } from '../ui/commun';
 import { EditeurRappels } from './EditeurRappels';
 import { BlocInvitation, CreationMembre } from './Onboarding';
+import { BlocCodeRetour } from './Persistance';
 
 const PIECES: PieceId[] = ['salon', 'cuisine', 'chambre', 'salleDeBain'];
 const MURS = ['#f6e7d2', '#e9f1e4', '#e4eef6', '#f6e4ea', '#efe6f6', '#fbf3d9', '#f3ddc6', '#dde8e3'];
@@ -173,6 +174,15 @@ export function Reglages() {
           </>
         )}
       </section>
+
+      {synchro && (
+        <section className="carte">
+          <h2>🔑 {t('retour.titre')}</h2>
+          <p className="champ-aide">{t('retour.intro')}</p>
+          <BlocCodeRetour />
+          <p className="champ-aide">{t('retour.remplace')}</p>
+        </section>
+      )}
 
       <section className="carte">
         <h2>{t('reglages.maison')}</h2>
